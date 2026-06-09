@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' file:; style-src 'unsafe-inline'"
+    />
+    <title>lanpai overlay</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: transparent;
+        font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      }
+
+      .el {
+        position: absolute;
+        cursor: move;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .el:hover {
+        outline: 1px dashed rgba(255, 255, 255, 0.6);
+      }
+
+      .el .content {
+        display: block;
+        pointer-events: none;
+      }
+
+      .el.text .content {
+        color: #fff;
+        white-space: pre-wrap;
+        line-height: 1.3;
+        text-shadow:
+          0 0 4px rgba(0, 0, 0, 0.9),
+          0 1px 2px rgba(0, 0, 0, 0.9);
+      }
+
+      .el.text .content[contenteditable='true'] {
+        pointer-events: auto;
+        cursor: text;
+        user-select: text;
+        outline: 1px solid rgba(120, 180, 255, 0.8);
+      }
+
+      .el img.content {
+        width: 100%;
+        height: auto;
+        -webkit-user-drag: none;
+      }
+
+      .handle {
+        position: absolute;
+        right: -7px;
+        bottom: -7px;
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        background: rgba(120, 180, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        cursor: nwse-resize;
+        display: none;
+      }
+
+      .el:hover .handle {
+        display: block;
+      }
+
+      #text-entry {
+        position: absolute;
+        left: 50%;
+        top: 40%;
+        transform: translate(-50%, -50%);
+        display: none;
+      }
+
+      #text-entry input {
+        width: 420px;
+        padding: 12px 16px;
+        font-size: 22px;
+        border: 1px solid rgba(120, 180, 255, 0.8);
+        border-radius: 8px;
+        background: rgba(20, 20, 20, 0.85);
+        color: #fff;
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="text-entry"><input type="text" placeholder="輸入文字,Enter 確認,Esc 取消" /></div>
+    <script src="overlay.js"></script>
+  </body>
+</html>
