@@ -61,6 +61,10 @@ function createTray() {
   tray.on('double-click', addText)
 }
 
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+}
+
 app.whenReady().then(() => {
   ipcMain.on('set-ignore-mouse', (_event, ignore) => {
     if (!win) return
