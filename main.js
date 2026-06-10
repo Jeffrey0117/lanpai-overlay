@@ -44,6 +44,11 @@ function addText() {
   win.focus()
 }
 
+function addImageUrl() {
+  win.webContents.send('add-image-url')
+  win.focus()
+}
+
 function createTray() {
   const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png'))
   tray = new Tray(icon)
@@ -51,7 +56,8 @@ function createTray() {
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: '加文字', click: addText },
-      { label: '加圖片', click: addImage },
+      { label: '加圖片(選檔)', click: addImage },
+      { label: '加圖片(網址)', click: addImageUrl },
       { type: 'separator' },
       { label: '清空全部', click: () => win.webContents.send('clear-all') },
       { type: 'separator' },

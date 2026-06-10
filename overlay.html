@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' file:; style-src 'unsafe-inline'"
+      content="default-src 'self'; img-src 'self' file: data: https: http:; style-src 'unsafe-inline'"
     />
     <title>lanpai overlay</title>
     <style>
@@ -81,6 +81,60 @@
         display: none;
       }
 
+      #toolbar {
+        position: absolute;
+        display: none;
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px;
+        background: rgba(20, 20, 20, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        z-index: 9999;
+      }
+
+      .tb-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .tb-row:empty {
+        display: none;
+      }
+
+      .swatch {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .tb-btn,
+      .chip {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .chip {
+        font-weight: 700;
+        padding: 2px 8px;
+        background: rgba(0, 0, 0, 0.6);
+      }
+
+      .tb-btn:hover,
+      .chip:hover,
+      .swatch:hover {
+        outline: 1px solid rgba(120, 180, 255, 0.9);
+      }
+
       #text-entry input {
         width: 420px;
         padding: 12px 16px;
@@ -95,6 +149,7 @@
   </head>
   <body>
     <div id="text-entry"><input type="text" placeholder="輸入文字,Enter 確認,Esc 取消" /></div>
+    <script src="toolbar.js"></script>
     <script src="overlay.js"></script>
   </body>
 </html>

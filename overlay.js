@@ -5,9 +5,11 @@ const entryInput = entry.querySelector('input')
 
 let interactive = false
 let entryOpen = false
+let entryMode = 'text'
 let editingContent = null
 let dragState = null
 let cascade = 0
+let toolbarHideTimer = null
 
 function setInteractive(on) {
   if (on === interactive) return
@@ -16,9 +18,9 @@ function setInteractive(on) {
 }
 
 function shouldBeInteractive(target) {
-  if (entryOpen || editingContent || dragState) return true
+  if (entryOpen || editingContent || dragState || toolbarVisible()) return true
   if (!(target instanceof Element)) return false
-  return Boolean(target.closest('.el'))
+  return Boolean(target.closest('.el, #toolbar'))
 }
 
 function nextPosition() {
@@ -47,6 +49,7 @@ function addTextElement(text) {
   content.textContent = text
   el.appendChild(content)
   appendWithHandle(el)
+  applyStyleTo(el, getCurrentStyle())
 }
 
 function toFileUrl(filePath) {
@@ -54,7 +57,7 @@ function toFileUrl(filePath) {
   return `file:///${encodeURI(normalized).replace(/#/g, '%23')}`
 }
 
-function addImageElement(filePath) {
+function addImageElement(source) {
   const el = createElement('image')
   const img = document.createElement('img')
   img.className = 'content'
@@ -63,7 +66,7 @@ function addImageElement(filePath) {
     const maxWidth = Math.round(window.innerWidth * 0.4)
     el.style.width = `${Math.min(img.naturalWidth, maxWidth)}px`
   })
-  img.src = toFileUrl(filePath)
+  img.src = /^https?:\/\//i.test(source) ? source : toFileUrl(source)
   el.appendChild(img)
   appendWithHandle(el)
 }
@@ -134,10 +137,13 @@ function startTextEdit(el) {
   selection.addRange(range)
 }
 
-function openEntry() {
+function openEntry(mode) {
   entryOpen = true
+  entryMode = mode
   entry.style.display = 'block'
   entryInput.value = ''
+  entryInput.placeholder =
+    mode === 'imageUrl' ? '貼上圖片網址,Enter 確認,Esc 取消' : '輸入文字,Enter 確認,Esc 取消'
   setInteractive(true)
   entryInput.focus()
 }
@@ -150,19 +156,43 @@ function closeEntry() {
 
 entryInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') {
-    const text = entryInput.value.trim()
-    if (text !== '') addTextElement(text)
+    const value = entryInput.value.trim()
+    if (value !== '') {
+      if (entryMode === 'imageUrl') {
+        if (/^https?:\/\//i.test(value)) addImageElement(value)
+      } else {
+        addTextElement(value)
+      }
+    }
     closeEntry()
   } else if (event.key === 'Escape') {
     closeEntry()
   }
 })
 
+function scheduleToolbarHide(target) {
+  if (!toolbarVisible()) return
+  const nearToolbar = target instanceof Element && target.closest('.el, #toolbar')
+  if (nearToolbar) {
+    clearTimeout(toolbarHideTimer)
+    toolbarHideTimer = null
+    return
+  }
+  if (toolbarHideTimer) return
+  toolbarHideTimer = setTimeout(() => {
+    toolbarHideTimer = null
+    hideToolbar()
+    setInteractive(false)
+  }, 400)
+}
+
 document.addEventListener('mousemove', (event) => {
   if (dragState) {
     applyDrag(event)
+    if (dragState.el === toolbarTarget) positionToolbar()
     return
   }
+  scheduleToolbarHide(event.target)
   setInteractive(shouldBeInteractive(event.target))
 })
 
@@ -177,7 +207,9 @@ document.addEventListener('mousedown', (event) => {
     return
   }
   const el = event.target.closest('.el')
-  if (el) startDrag(el, event)
+  if (!el) return
+  startDrag(el, event)
+  if (el.classList.contains('text')) showToolbarFor(el)
 })
 
 document.addEventListener('mouseup', () => {
@@ -190,9 +222,11 @@ document.addEventListener('dblclick', (event) => {
 })
 
 document.addEventListener('contextmenu', (event) => {
+  if (event.target.closest('#toolbar')) return
   const el = event.target.closest('.el')
   if (!el) return
   event.preventDefault()
+  if (el === toolbarTarget) hideToolbar()
   el.remove()
   setInteractive(false)
 })
@@ -210,9 +244,11 @@ window.addEventListener('blur', () => {
   if (entryOpen) closeEntry()
 })
 
-api.onAddText(openEntry)
+api.onAddText(() => openEntry('text'))
+api.onAddImageUrl(() => openEntry('imageUrl'))
 api.onAddImage(addImageElement)
 api.onClearAll(() => {
+  hideToolbar()
   document.querySelectorAll('.el').forEach((el) => el.remove())
   setInteractive(false)
 })
