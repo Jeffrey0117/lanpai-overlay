@@ -149,8 +149,14 @@ function syncToolbarState() {
 
 function showToolbarFor(el) {
   toolbarTarget = el
+  const isText = el.classList.contains('text')
+  swatchRow.style.display = isText ? '' : 'none'
+  controlRow.style.display = isText ? '' : 'none'
+  templateRow.style.display = isText ? '' : 'none'
+  urlRow.style.display = isText ? 'none' : ''
   toolbar.style.display = 'flex'
-  syncToolbarState()
+  if (isText) syncToolbarState()
+  else urlInput.value = ''
   positionToolbar()
 }
 
@@ -178,8 +184,25 @@ controlRow.appendChild(weightBtn)
 controlRow.appendChild(shadowBtn)
 controlRow.appendChild(saveBtn)
 
+const urlRow = document.createElement('div')
+urlRow.className = 'tb-row'
+const urlInput = document.createElement('input')
+urlInput.id = 'tb-url'
+urlInput.type = 'text'
+urlInput.placeholder = '貼上圖片網址,Enter 換圖'
+urlInput.addEventListener('keydown', (event) => {
+  event.stopPropagation()
+  if (event.key !== 'Enter' || !toolbarTarget) return
+  const value = urlInput.value.trim()
+  if (!/^https?:\/\//i.test(value)) return
+  toolbarTarget.querySelector('img.content').src = value
+  urlInput.value = ''
+})
+urlRow.appendChild(urlInput)
+
 toolbar.appendChild(swatchRow)
 toolbar.appendChild(controlRow)
 toolbar.appendChild(templateRow)
+toolbar.appendChild(urlRow)
 document.body.appendChild(toolbar)
 renderTemplates()

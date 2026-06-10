@@ -61,10 +61,19 @@ function addImageElement(source) {
   const el = createElement('image')
   const img = document.createElement('img')
   img.className = 'content'
-  img.addEventListener('error', () => el.remove())
+  img.addEventListener('error', () => {
+    if (img.dataset.lastGood) {
+      img.src = img.dataset.lastGood
+    } else {
+      el.remove()
+    }
+  })
   img.addEventListener('load', () => {
-    const maxWidth = Math.round(window.innerWidth * 0.4)
-    el.style.width = `${Math.min(img.naturalWidth, maxWidth)}px`
+    if (!img.dataset.lastGood) {
+      const maxWidth = Math.round(window.innerWidth * 0.4)
+      el.style.width = `${Math.min(img.naturalWidth, maxWidth)}px`
+    }
+    img.dataset.lastGood = img.src
   })
   img.src = /^https?:\/\//i.test(source) ? source : toFileUrl(source)
   el.appendChild(img)
@@ -209,7 +218,7 @@ document.addEventListener('mousedown', (event) => {
   const el = event.target.closest('.el')
   if (!el) return
   startDrag(el, event)
-  if (el.classList.contains('text')) showToolbarFor(el)
+  showToolbarFor(el)
 })
 
 document.addEventListener('mouseup', () => {
@@ -235,6 +244,14 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && editingContent && !event.shiftKey) {
     event.preventDefault()
     finishTextEdit()
+    setInteractive(false)
+    return
+  }
+  const typing = editingContent || entryOpen || event.target instanceof HTMLInputElement
+  if (event.key === 'Delete' && toolbarTarget && !typing) {
+    const el = toolbarTarget
+    hideToolbar()
+    el.remove()
     setInteractive(false)
   }
 })
