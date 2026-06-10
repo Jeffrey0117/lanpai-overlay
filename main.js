@@ -11,9 +11,20 @@ const {
   clipboard
 } = require('electron')
 const path = require('path')
+const fs = require('fs')
 
 let win = null
 let tray = null
+
+const pasteDir = path.join(app.getPath('temp'), 'lanpai-overlay-paste')
+
+function clearPasteDir() {
+  try {
+    fs.rmSync(pasteDir, { recursive: true, force: true })
+  } catch (error) {
+    // 暫存清不掉就留給下次,不影響功能
+  }
+}
 
 function createWindow() {
   const { bounds } = screen.getPrimaryDisplay()
@@ -58,7 +69,14 @@ function addSmart() {
 function pasteClipboardImage() {
   const image = clipboard.readImage()
   if (!image.isEmpty()) {
-    win.webContents.send('add-image', image.toDataURL())
+    try {
+      fs.mkdirSync(pasteDir, { recursive: true })
+      const filePath = path.join(pasteDir, `paste-${Date.now()}.png`)
+      fs.writeFileSync(filePath, image.toPNG())
+      win.webContents.send('add-image', filePath)
+    } catch (error) {
+      win.webContents.send('add-image', image.toDataURL())
+    }
     return
   }
   const text = clipboard.readText().trim()
@@ -99,6 +117,7 @@ app.whenReady().then(() => {
     }
   })
 
+  clearPasteDir()
   createWindow()
   createTray()
   globalShortcut.register('CommandOrControl+Shift+Space', addSmart)
@@ -107,6 +126,7 @@ app.whenReady().then(() => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
+  clearPasteDir()
 })
 
 app.on('window-all-closed', () => {
