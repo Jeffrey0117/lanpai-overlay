@@ -26,7 +26,13 @@ function shadowContrastColor(hex) {
   return luminance < 0.45 ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.9)'
 }
 
-const DEFAULT_STYLE = { color: '#ffffff', weight: 700, shadow: 'soft' }
+const BACKGROUNDS = [
+  { key: 'none', label: '無底', css: 'transparent' },
+  { key: 'dark', label: '黑底', css: 'rgba(0, 0, 0, 0.65)' },
+  { key: 'light', label: '白底', css: 'rgba(255, 255, 255, 0.85)' }
+]
+
+const DEFAULT_STYLE = { color: '#ffffff', weight: 700, shadow: 'soft', bg: 'none' }
 const MAX_TEMPLATES = 6
 
 function parseJson(raw, fallback) {
@@ -69,9 +75,13 @@ function applyStyleTo(el, style) {
   el.dataset.style = JSON.stringify(merged)
   const content = el.querySelector('.content')
   const shadow = SHADOWS.find((s) => s.key === merged.shadow) || SHADOWS[1]
+  const bg = BACKGROUNDS.find((b) => b.key === merged.bg) || BACKGROUNDS[0]
   content.style.color = merged.color
   content.style.fontWeight = String(merged.weight)
   content.style.textShadow = shadow.css(shadowContrastColor(merged.color))
+  content.style.background = bg.css
+  content.style.padding = merged.bg === 'none' ? '0' : '0.2em 0.45em'
+  content.style.borderRadius = merged.bg === 'none' ? '0' : '0.18em'
 }
 
 function updateTargetStyle(patch) {
@@ -116,6 +126,16 @@ shadowBtn.addEventListener('click', () => {
   updateTargetStyle({ shadow: next.key })
 })
 
+const bgBtn = document.createElement('button')
+bgBtn.className = 'tb-btn'
+bgBtn.addEventListener('click', () => {
+  if (!toolbarTarget) return
+  const { bg } = getElementStyle(toolbarTarget)
+  const index = BACKGROUNDS.findIndex((b) => b.key === bg)
+  const next = BACKGROUNDS[(index + 1) % BACKGROUNDS.length]
+  updateTargetStyle({ bg: next.key })
+})
+
 const saveBtn = document.createElement('button')
 saveBtn.className = 'tb-btn'
 saveBtn.textContent = '存模板'
@@ -152,8 +172,10 @@ function syncToolbarState() {
   const style = getElementStyle(toolbarTarget)
   const weight = WEIGHTS.find((w) => w.value === style.weight) || WEIGHTS[1]
   const shadow = SHADOWS.find((s) => s.key === style.shadow) || SHADOWS[1]
+  const bg = BACKGROUNDS.find((b) => b.key === style.bg) || BACKGROUNDS[0]
   weightBtn.textContent = weight.label
   shadowBtn.textContent = shadow.label
+  bgBtn.textContent = bg.label
 }
 
 function showToolbarFor(el) {
@@ -191,6 +213,7 @@ const controlRow = document.createElement('div')
 controlRow.className = 'tb-row'
 controlRow.appendChild(weightBtn)
 controlRow.appendChild(shadowBtn)
+controlRow.appendChild(bgBtn)
 controlRow.appendChild(saveBtn)
 
 const urlRow = document.createElement('div')
