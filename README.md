@@ -1,137 +1,101 @@
 <p align="center">
-  <img src="assets/icon.png" alt="Lanpai Overlay" width="64" />
+  <img src="assets/icon.png" alt="懶拍 Overlay" width="64" />
 </p>
-<h1 align="center">Lanpai Overlay</h1>
+<h1 align="center">懶拍 Overlay</h1>
 <p align="center">
-  <strong>Pin text and images straight onto your screen. No window. No background. No fuss.</strong>
-</p>
-<p align="center">
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT" />
-  <img src="https://img.shields.io/badge/electron-36-blue" alt="Electron 36" />
-  <img src="https://img.shields.io/badge/framework-none-orange" alt="Zero Framework" />
+  <strong>把文字和圖片直接釘在螢幕上。沒有視窗,沒有背景,沒有廢話。</strong>
 </p>
 <p align="center">
-  English | <a href="README.zh-TW.md">繁體中文</a>
+  繁體中文 | <a href="README.en.md">English</a>
 </p>
 
 ---
 
-## Picture This
+## 想像一下
 
-You're recording a short video. You keep forgetting your lines, and every teleprompter app is a giant window in the way.
+你在錄短影片。台詞記不住,提詞 app 又是一個大視窗擋在那邊。
 
-You hit `Ctrl+Shift+Space`, type two lines, press Enter. Your script floats next to the camera — no background, just the words.
-Drag it where you want, scale it up, give it a dark backdrop. Done recording? Press Del. Gone like it was never there.
+你按 `Ctrl+Shift+Space`,打兩行台詞,按 Enter。台詞就浮在鏡頭旁邊——完全去背,只有字。
+拖到順眼的位置,拉大,加個黑底。錄完按 Del,字消失,像沒存在過。
 
-Need your storyboard mid-shoot? `Win+Shift+S` to snip, `Ctrl+Shift+V` to pin. It's on screen.
+中途要看分鏡?`Win+Shift+S` 截個圖、`Ctrl+Shift+V`,圖直接上牆。
 
-At no point did a "window" appear.
-
----
-
-## Why Not Snipaste / OBS?
-
-| | Snipaste pin | OBS text source | Lanpai Overlay |
-|---|---|---|---|
-| Pin images on screen | ✅ | ❌ canvas only | ✅ |
-| Type text onto screen | ❌ | ✅ but launch OBS first | ✅ **one hotkey** |
-| Truly frameless & transparent | ⚠️ has border | — | ✅ |
-| Click-through empty space | — | — | ✅ **never blocks you** |
-| Text styles + templates | ❌ | ⚠️ buried in settings | ✅ **floating panel** |
-| Setup weight | light | heavy | `npm start` |
+整個過程,螢幕上沒有出現過任何一個「視窗」。
 
 ---
 
-## What It Does
+## 怎麼開始
 
-### One key for everything
-`Ctrl+Shift+Space` opens a smart input — type text, or paste an `https://` image URL and it becomes an image. No mode switch.
-
-### Clipboard straight to screen
-`Ctrl+Shift+V` pins whatever image is in your clipboard. Pairs with `Win+Shift+S` for a two-second see-it-pin-it flow. Image URL in clipboard? Also works.
-
-### Hands-on elements, invisible everywhere else
-Over an element: drag to move, pull the corner handle to scale, double-click to edit, Del or right-click to remove.
-Over empty space: the layer is fully click-through. Your clicks land on whatever is underneath.
-
-### Style panel with shadows that never clash
-Click any text: 7 color swatches, 3 weights, 4 shadow styles, 3 backdrops (none / dark / light, padded wider than the text).
-Shadow color auto-contrasts — dark text gets a white shadow, light text gets a black one. Zero settings.
-Save styles as templates (T1, T2…) that survive restarts. Content itself is ephemeral by design — no scene files.
-
-### Swap images in place
-An image's panel is a URL field: paste, Enter, swapped — position and size preserved. Bad URL? It rolls back.
-
----
-
-## Quick Start
-
-```bash
+```
 git clone https://github.com/Jeffrey0117/lanpai-overlay.git
 cd lanpai-overlay
 npm install
 npm start
 ```
 
-Nothing appears on launch — that's by design. The blue dot in your system tray is the app.
+開起來之後**螢幕上什麼都不會出現——這是正常的**。
+看一下工作列右下角,有一顆藍色小圓點,它就在那裡待命。
 
-### Hotkeys
+---
 
-| Key | Action |
+## 怎麼用
+
+### 兩顆快捷鍵就會了
+
+| 按鍵 | 做什麼 |
 |---|---|
-| `Ctrl+Shift+Space` | Smart input (text / image URL) |
-| `Ctrl+Shift+V` | Pin clipboard image |
-| `Del` | Delete selected element |
-| `Esc` | Close input |
+| `Ctrl+Shift+Space` | 冒出輸入框:打字就是文字,貼圖片網址就是圖片 |
+| `Ctrl+Shift+V` | 把剪貼簿裡的圖直接釘上螢幕 |
 
-### Element actions
+最爽的用法:`Win+Shift+S` 截圖 → `Ctrl+Shift+V` 上牆,兩秒搞定。
 
-| Action | Effect |
+### 東西上螢幕之後
+
+| 動作 | 效果 |
 |---|---|
-| Drag element | Move |
-| Pull corner handle | Scale (font size for text, proportional for images) |
-| Click | Open style panel |
-| Double-click text | Edit in place |
-| Right-click element | Delete |
-| Right-click template chip | Delete that template |
+| 按住拖曳 | 移動位置 |
+| 拉右下角的小方塊 | 變大變小 |
+| 點一下 | 浮出樣式面板 |
+| 雙擊文字 | 重新打字 |
+| 按 `Del` 或右鍵 | 刪掉 |
+
+滑鼠不在這些東西上面的時候,整層完全不存在——你點滑鼠、打字、做任何事都不會被擋到。
+
+### 樣式面板
+
+點一下文字,上面會浮出一排小工具:
+
+- **7 種顏色**直接點
+- **粗細**:細 → 粗 → 黑,點一下換一段
+- **陰影**:無影 → 柔影 → 強影 → 描邊。影子顏色會自動配——黑字配白影、白字配黑影,永遠看得清楚
+- **底色**:無底 → 黑底 → 白底。底會比字大一圈,壓在花背景上也清楚
+- **存模板**:調好的樣式存起來(T1、T2⋯),下次點一下就套用,重開也還在
+
+點圖片的話,面板是一個網址框:貼新網址按 Enter,原地換圖,位置大小都不變。
+
+### 工作列小圓點
+
+忘記快捷鍵的時候,右鍵藍色小圓點,選單上都有(也標了快捷鍵提醒)。
+「清空全部」「結束」也在裡面。
 
 ---
 
-## Architecture
+## 一些刻意的設計
 
-Zero frameworks, zero build step, five files:
-
-```
-lanpai-overlay/
-├── main.js       # transparent window, tray, global hotkeys, clipboard, dialogs
-├── preload.js    # IPC bridge (8 lines)
-├── overlay.html  # overlay shell + styles
-├── overlay.js    # elements / drag / resize / mouse pass-through
-└── toolbar.js    # style panel, templates (localStorage)
-```
-
-Core trick: `setIgnoreMouseEvents(true, { forward: true })` + `mousemove` tracking — interactive over elements, fully click-through everywhere else.
+- **不存檔**:關掉就清空。這是隨手用的工具,不是文件編輯器,所以沒有檔案要管理。
+- **不佔位**:沒有主視窗、不佔工作列、平常完全隱形。
+- **樣式會記得**:模板和你最後用的樣式會留著,內容不會。
 
 ---
 
-## Lineage
+## 之後可能會做
 
-Successor to [lanpai-blueplan](https://github.com/Jeffrey0117/lanpai-blueplan) (Tauri + React), rebuilt from scratch: less code, no compile step, starts instantly.
-
----
-
-## Roadmap
-
-- [x] Transparent overlay + tray
-- [x] Global hotkeys + clipboard pin
-- [x] Style panel + templates
-- [x] Text backdrops
-- [ ] Portable exe packaging (electron-builder)
-- [ ] Multi-monitor support
-- [ ] Custom hotkeys
+- [ ] 打包成點兩下就能開的執行檔(現在要裝 Node.js)
+- [ ] 多螢幕支援
+- [ ] 自己改快捷鍵
 
 ---
 
-## License
+## 授權
 
 MIT

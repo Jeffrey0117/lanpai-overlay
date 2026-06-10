@@ -1,0 +1,137 @@
+<p align="center">
+  <img src="assets/icon.png" alt="Lanpai Overlay" width="64" />
+</p>
+<h1 align="center">Lanpai Overlay</h1>
+<p align="center">
+  <strong>Pin text and images straight onto your screen. No window. No background. No fuss.</strong>
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT" />
+  <img src="https://img.shields.io/badge/electron-36-blue" alt="Electron 36" />
+  <img src="https://img.shields.io/badge/framework-none-orange" alt="Zero Framework" />
+</p>
+<p align="center">
+  <a href="README.md">繁體中文</a> | English
+</p>
+
+---
+
+## Picture This
+
+You're recording a short video. You keep forgetting your lines, and every teleprompter app is a giant window in the way.
+
+You hit `Ctrl+Shift+Space`, type two lines, press Enter. Your script floats next to the camera — no background, just the words.
+Drag it where you want, scale it up, give it a dark backdrop. Done recording? Press Del. Gone like it was never there.
+
+Need your storyboard mid-shoot? `Win+Shift+S` to snip, `Ctrl+Shift+V` to pin. It's on screen.
+
+At no point did a "window" appear.
+
+---
+
+## Why Not Snipaste / OBS?
+
+| | Snipaste pin | OBS text source | Lanpai Overlay |
+|---|---|---|---|
+| Pin images on screen | ✅ | ❌ canvas only | ✅ |
+| Type text onto screen | ❌ | ✅ but launch OBS first | ✅ **one hotkey** |
+| Truly frameless & transparent | ⚠️ has border | — | ✅ |
+| Click-through empty space | — | — | ✅ **never blocks you** |
+| Text styles + templates | ❌ | ⚠️ buried in settings | ✅ **floating panel** |
+| Setup weight | light | heavy | `npm start` |
+
+---
+
+## What It Does
+
+### One key for everything
+`Ctrl+Shift+Space` opens a smart input — type text, or paste an `https://` image URL and it becomes an image. No mode switch.
+
+### Clipboard straight to screen
+`Ctrl+Shift+V` pins whatever image is in your clipboard. Pairs with `Win+Shift+S` for a two-second see-it-pin-it flow. Image URL in clipboard? Also works.
+
+### Hands-on elements, invisible everywhere else
+Over an element: drag to move, pull the corner handle to scale, double-click to edit, Del or right-click to remove.
+Over empty space: the layer is fully click-through. Your clicks land on whatever is underneath.
+
+### Style panel with shadows that never clash
+Click any text: 7 color swatches, 3 weights, 4 shadow styles, 3 backdrops (none / dark / light, padded wider than the text).
+Shadow color auto-contrasts — dark text gets a white shadow, light text gets a black one. Zero settings.
+Save styles as templates (T1, T2…) that survive restarts. Content itself is ephemeral by design — no scene files.
+
+### Swap images in place
+An image's panel is a URL field: paste, Enter, swapped — position and size preserved. Bad URL? It rolls back.
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/Jeffrey0117/lanpai-overlay.git
+cd lanpai-overlay
+npm install
+npm start
+```
+
+Nothing appears on launch — that's by design. The blue dot in your system tray is the app.
+
+### Hotkeys
+
+| Key | Action |
+|---|---|
+| `Ctrl+Shift+Space` | Smart input (text / image URL) |
+| `Ctrl+Shift+V` | Pin clipboard image |
+| `Del` | Delete selected element |
+| `Esc` | Close input |
+
+### Element actions
+
+| Action | Effect |
+|---|---|
+| Drag element | Move |
+| Pull corner handle | Scale (font size for text, proportional for images) |
+| Click | Open style panel |
+| Double-click text | Edit in place |
+| Right-click element | Delete |
+| Right-click template chip | Delete that template |
+
+---
+
+## Architecture
+
+Zero frameworks, zero build step, five files:
+
+```
+lanpai-overlay/
+├── main.js       # transparent window, tray, global hotkeys, clipboard, dialogs
+├── preload.js    # IPC bridge (8 lines)
+├── overlay.html  # overlay shell + styles
+├── overlay.js    # elements / drag / resize / mouse pass-through
+└── toolbar.js    # style panel, templates (localStorage)
+```
+
+Core trick: `setIgnoreMouseEvents(true, { forward: true })` + `mousemove` tracking — interactive over elements, fully click-through everywhere else.
+
+---
+
+## Lineage
+
+Successor to [lanpai-blueplan](https://github.com/Jeffrey0117/lanpai-blueplan) (Tauri + React), rebuilt from scratch: less code, no compile step, starts instantly.
+
+---
+
+## Roadmap
+
+- [x] Transparent overlay + tray
+- [x] Global hotkeys + clipboard pin
+- [x] Style panel + templates
+- [x] Text backdrops
+- [ ] Portable exe packaging (electron-builder)
+- [ ] Multi-monitor support
+- [ ] Custom hotkeys
+
+---
+
+## License
+
+MIT
