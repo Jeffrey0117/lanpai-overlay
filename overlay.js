@@ -5,7 +5,6 @@ const entryInput = entry.querySelector('input')
 
 let interactive = false
 let entryOpen = false
-let entryMode = 'text'
 let editingContent = null
 let dragState = null
 let cascade = 0
@@ -75,7 +74,7 @@ function addImageElement(source) {
     }
     img.dataset.lastGood = img.src
   })
-  img.src = /^https?:\/\//i.test(source) ? source : toFileUrl(source)
+  img.src = /^(https?|data):/i.test(source) ? source : toFileUrl(source)
   el.appendChild(img)
   appendWithHandle(el)
 }
@@ -146,13 +145,10 @@ function startTextEdit(el) {
   selection.addRange(range)
 }
 
-function openEntry(mode) {
+function openEntry() {
   entryOpen = true
-  entryMode = mode
   entry.style.display = 'block'
   entryInput.value = ''
-  entryInput.placeholder =
-    mode === 'imageUrl' ? '貼上圖片網址,Enter 確認,Esc 取消' : '輸入文字,Enter 確認,Esc 取消'
   setInteractive(true)
   entryInput.focus()
 }
@@ -167,8 +163,8 @@ entryInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') {
     const value = entryInput.value.trim()
     if (value !== '') {
-      if (entryMode === 'imageUrl') {
-        if (/^https?:\/\//i.test(value)) addImageElement(value)
+      if (/^https?:\/\/\S+$/i.test(value)) {
+        addImageElement(value)
       } else {
         addTextElement(value)
       }
@@ -261,8 +257,7 @@ window.addEventListener('blur', () => {
   if (entryOpen) closeEntry()
 })
 
-api.onAddText(() => openEntry('text'))
-api.onAddImageUrl(() => openEntry('imageUrl'))
+api.onAddSmart(() => openEntry())
 api.onAddImage(addImageElement)
 api.onClearAll(() => {
   hideToolbar()

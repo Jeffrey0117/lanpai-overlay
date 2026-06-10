@@ -1,4 +1,15 @@
-const { app, BrowserWindow, Tray, Menu, dialog, ipcMain, screen, nativeImage } = require('electron')
+const {
+  app,
+  BrowserWindow,
+  Tray,
+  Menu,
+  dialog,
+  ipcMain,
+  screen,
+  nativeImage,
+  globalShortcut,
+  clipboard
+} = require('electron')
 const path = require('path')
 
 let win = null
@@ -39,14 +50,21 @@ async function addImage() {
   win.webContents.send('add-image', result.filePaths[0])
 }
 
-function addText() {
-  win.webContents.send('add-text')
+function addSmart() {
+  win.webContents.send('add-smart')
   win.focus()
 }
 
-function addImageUrl() {
-  win.webContents.send('add-image-url')
-  win.focus()
+function pasteClipboardImage() {
+  const image = clipboard.readImage()
+  if (!image.isEmpty()) {
+    win.webContents.send('add-image', image.toDataURL())
+    return
+  }
+  const text = clipboard.readText().trim()
+  if (/^https?:\/\/\S+$/i.test(text)) {
+    win.webContents.send('add-image', text)
+  }
 }
 
 function createTray() {
@@ -55,16 +73,16 @@ function createTray() {
   tray.setToolTip('懶拍 Overlay')
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      { label: '加文字', click: addText },
+      { label: '加文字 / 圖片網址\tCtrl+Shift+Space', click: addSmart },
+      { label: '貼剪貼簿圖片\tCtrl+Shift+V', click: pasteClipboardImage },
       { label: '加圖片(選檔)', click: addImage },
-      { label: '加圖片(網址)', click: addImageUrl },
       { type: 'separator' },
       { label: '清空全部', click: () => win.webContents.send('clear-all') },
       { type: 'separator' },
       { label: '結束', click: () => app.quit() }
     ])
   )
-  tray.on('double-click', addText)
+  tray.on('double-click', addSmart)
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -83,6 +101,12 @@ app.whenReady().then(() => {
 
   createWindow()
   createTray()
+  globalShortcut.register('CommandOrControl+Shift+Space', addSmart)
+  globalShortcut.register('CommandOrControl+Shift+V', pasteClipboardImage)
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })
 
 app.on('window-all-closed', () => {

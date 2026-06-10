@@ -7,15 +7,24 @@ const WEIGHTS = [
 ]
 
 const SHADOWS = [
-  { key: 'none', label: '無影', css: 'none' },
-  { key: 'soft', label: '柔影', css: '0 0 4px rgba(0,0,0,.9), 0 1px 2px rgba(0,0,0,.9)' },
-  { key: 'strong', label: '強影', css: '0 0 10px rgba(0,0,0,1), 0 2px 6px rgba(0,0,0,1)' },
+  { key: 'none', label: '無影', css: () => 'none' },
+  { key: 'soft', label: '柔影', css: (c) => `0 0 4px ${c}, 0 1px 2px ${c}` },
+  { key: 'strong', label: '強影', css: (c) => `0 0 10px ${c}, 0 2px 6px ${c}` },
   {
     key: 'outline',
     label: '描邊',
-    css: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
+    css: (c) => `-1px -1px 0 ${c}, 1px -1px 0 ${c}, -1px 1px 0 ${c}, 1px 1px 0 ${c}`
   }
 ]
+
+function shadowContrastColor(hex) {
+  const value = hex.replace('#', '')
+  const r = parseInt(value.slice(0, 2), 16) / 255
+  const g = parseInt(value.slice(2, 4), 16) / 255
+  const b = parseInt(value.slice(4, 6), 16) / 255
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  return luminance < 0.45 ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.9)'
+}
 
 const DEFAULT_STYLE = { color: '#ffffff', weight: 700, shadow: 'soft' }
 const MAX_TEMPLATES = 6
@@ -62,7 +71,7 @@ function applyStyleTo(el, style) {
   const shadow = SHADOWS.find((s) => s.key === merged.shadow) || SHADOWS[1]
   content.style.color = merged.color
   content.style.fontWeight = String(merged.weight)
-  content.style.textShadow = shadow.css
+  content.style.textShadow = shadow.css(shadowContrastColor(merged.color))
 }
 
 function updateTargetStyle(patch) {
