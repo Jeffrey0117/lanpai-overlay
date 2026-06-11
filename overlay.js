@@ -389,6 +389,12 @@ document.addEventListener('keydown', (event) => {
 window.addEventListener('blur', () => {
   finishTextEdit()
   if (entryOpen) closeEntry()
+  pendingItemDrag = null
+  if (dragState) {
+    dragState.el.style.zIndex = ''
+    clearDropIndicator()
+    dragState = null
+  }
 })
 
 function restoreSnapshot(items) {
