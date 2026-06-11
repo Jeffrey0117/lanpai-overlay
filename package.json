@@ -5,9 +5,41 @@
   "private": true,
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "icon": "node scripts/gen-icon.js",
+    "dist": "electron-builder --win"
   },
   "devDependencies": {
-    "electron": "^36.0.0"
+    "electron": "^36.0.0",
+    "electron-builder": "^26.15.2"
+  },
+  "build": {
+    "appId": "com.jeffrey0117.lanpai-overlay",
+    "productName": "Lanpai Overlay",
+    "icon": "assets/icon-256.png",
+    "files": [
+      "main.js",
+      "preload.js",
+      "overlay.html",
+      "overlay.js",
+      "toolbar.js",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "懶拍 Overlay"
+    },
+    "portable": {
+      "artifactName": "Lanpai-Overlay-${version}-portable.exe"
+    }
   }
 }

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>懶拍 Overlay — 把文字和圖片直接釘在螢幕上</title>
+    <meta
+      name="description"
+      content="去背的螢幕浮層。打字、貼圖、釘在鏡頭旁邊。沒有視窗,沒有背景,沒有廢話。"
+    />
+    <link rel="icon" href="icon.png" />
+    <meta property="og:title" content="懶拍 Overlay" />
+    <meta
+      property="og:description"
+      content="把文字和圖片直接釘在螢幕上。沒有視窗,沒有背景,沒有廢話。"
+    />
+    <meta property="og:image" content="og.png" />
+    <meta property="og:type" content="website" />
+    <style>
+      :root {
+        --blue: #78b4ff;
+        --blue-deep: #3f86f0;
+        --bg: #0c0e12;
+        --panel: #151922;
+        --text: #e8edf5;
+        --muted: #8c97a8;
+        --line: rgba(255, 255, 255, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(1200px 600px at 50% -10%, rgba(120, 180, 255, 0.14), transparent 60%),
+          var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      header {
+        text-align: center;
+        padding: 96px 24px 64px;
+      }
+      .logo {
+        width: 88px;
+        height: 88px;
+        filter: drop-shadow(0 8px 28px rgba(120, 180, 255, 0.45));
+      }
+      h1 {
+        font-size: clamp(2.2rem, 6vw, 3.4rem);
+        margin: 22px 0 8px;
+        letter-spacing: -0.5px;
+      }
+      .tagline {
+        font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+        color: var(--muted);
+        max-width: 540px;
+        margin: 0 auto 36px;
+      }
+      .cta {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 26px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, var(--blue), var(--blue-deep));
+        color: #07101f;
+        box-shadow: 0 8px 24px rgba(63, 134, 240, 0.4);
+      }
+      .btn-ghost {
+        background: var(--panel);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+      .sub {
+        margin-top: 14px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      section {
+        padding: 40px 0;
+        border-top: 1px solid var(--line);
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 0 0 22px;
+      }
+      .story {
+        font-size: 1.1rem;
+        color: #cdd6e3;
+      }
+      .story strong {
+        color: var(--blue);
+        font-weight: 600;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 22px;
+      }
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.98rem;
+      }
+      td {
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      kbd {
+        background: #0a0d13;
+        border: 1px solid var(--line);
+        border-bottom-width: 2px;
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.85rem;
+        color: var(--blue);
+        white-space: nowrap;
+      }
+      pre {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px 20px;
+        overflow-x: auto;
+        font-size: 0.92rem;
+        color: #cdd6e3;
+      }
+      footer {
+        text-align: center;
+        padding: 48px 24px 72px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        border-top: 1px solid var(--line);
+      }
+      footer a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <img class="logo" src="icon.png" alt="懶拍 Overlay" />
+        <h1>懶拍 Overlay</h1>
+        <p class="tagline">把文字和圖片直接釘在螢幕上。<br />沒有視窗,沒有背景,沒有廢話。</p>
+        <div class="cta">
+          <a
+            class="btn btn-primary"
+            href="https://github.com/Jeffrey0117/lanpai-overlay/releases/latest/download/Lanpai-Overlay-0.1.0-Setup.exe"
+            >下載安裝版 (Windows)</a
+          >
+          <a
+            class="btn btn-ghost"
+            href="https://github.com/Jeffrey0117/lanpai-overlay/releases/latest/download/Lanpai-Overlay-0.1.0-portable.exe"
+            >免安裝版</a
+          >
+        </div>
+        <p class="sub">
+          Windows x64 · 點兩下就開 ·
+          <a
+            href="https://github.com/Jeffrey0117/lanpai-overlay"
+            style="color: var(--muted)"
+            >原始碼在 GitHub</a
+          >
+        </p>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <section>
+        <h2>想像一下</h2>
+        <p class="story">
+          你在錄短影片。台詞記不住,提詞 app 又是一個大視窗擋在那邊。<br /><br />
+          你按 <strong>Ctrl+Shift+Space</strong>,打兩行台詞,按 Enter。台詞就浮在鏡頭旁邊——完全去背,只有字。
+          拖到順眼的位置,拉大,加個黑底。錄完按 Del,字消失,像沒存在過。<br /><br />
+          中途要看分鏡?<strong>Win+Shift+S</strong> 截個圖、<strong>Ctrl+Shift+V</strong>,圖直接上牆。<br /><br />
+          整個過程,螢幕上沒有出現過任何一個「視窗」。
+        </p>
+      </section>
+
+      <section>
+        <h2>兩顆快捷鍵就會了</h2>
+        <table>
+          <tr>
+            <td><kbd>Ctrl+Shift+Space</kbd></td>
+            <td>冒出輸入框:打字就是文字,貼圖片網址就是圖片</td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl+Shift+V</kbd></td>
+            <td>把剪貼簿裡的圖直接釘上螢幕</td>
+          </tr>
+        </table>
+        <p class="sub">最爽的用法:<kbd>Win+Shift+S</kbd> 截圖 → <kbd>Ctrl+Shift+V</kbd> 上牆,兩秒搞定。</p>
+      </section>
+
+      <section>
+        <h2>東西上螢幕之後</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>拖、拉、縮</h3>
+            <p>按住拖曳移動;拉右下角小方塊變大變小。</p>
+          </div>
+          <div class="card">
+            <h3>樣式面板</h3>
+            <p>點一下浮出工具列:7 種顏色、粗細、陰影、底色,還能存模板。</p>
+          </div>
+          <div class="card">
+            <h3>自動配影子</h3>
+            <p>黑字配白影、白字配黑影,壓在花背景上永遠看得清楚。</p>
+          </div>
+          <div class="card">
+            <h3>滑鼠穿透</h3>
+            <p>滑鼠不在元素上時整層完全不存在,點擊打字都不會被擋到。</p>
+          </div>
+          <div class="card">
+            <h3>原地換圖</h3>
+            <p>點圖片貼新網址按 Enter,位置大小都不變。</p>
+          </div>
+          <div class="card">
+            <h3>不存檔</h3>
+            <p>關掉就清空。樣式和模板會記得,內容不會。</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>用原始碼跑</h2>
+        <pre>git clone https://github.com/Jeffrey0117/lanpai-overlay.git
+cd lanpai-overlay
+npm install
+npm start</pre>
+        <p class="sub">開起來之後螢幕上什麼都不會出現——這是正常的。看右下角工作列,藍色小圓點就在那待命。</p>
+      </section>
+    </div>
+
+    <footer>
+      MIT License ·
+      <a href="https://github.com/Jeffrey0117/lanpai-overlay">GitHub</a> ·
+      made by Jeffrey0117
+    </footer>
+  </body>
+</html>
