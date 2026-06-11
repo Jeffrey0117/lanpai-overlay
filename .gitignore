@@ -1,2 +1,5 @@
 node_modules/
 dist/
+smoke-out.log
+smoke-err.log
+smoke-result.json

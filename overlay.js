@@ -7,9 +7,11 @@ let interactive = false
 let entryOpen = false
 let editingContent = null
 let dragState = null
+let pendingItemDrag = null
 let cascade = 0
 let toolbarHideTimer = null
 let promptOpen = false
+let wheelSaveTimer = null
 
 // 當機/誤關復原:背景一直記快照,只有上次「沒善終」時才問要不要還原
 const SNAP_KEY = 'lanpai-snapshot'
@@ -19,6 +21,7 @@ function serializeElements() {
   return [...document.querySelectorAll('.el')].map((el) => {
     const x = parseFloat(el.style.left) || 0
     const y = parseFloat(el.style.top) || 0
+    if (el.classList.contains('board')) return serializeBoard(el)
     if (el.classList.contains('text')) {
       const content = el.querySelector('.content')
       return { kind: 'text', x, y, fontSize: el.style.fontSize, text: content.textContent, style: getElementStyle(el) }
@@ -148,10 +151,11 @@ function appendWithHandle(el) {
 
 function startDrag(el, event) {
   const rect = el.getBoundingClientRect()
+  el.style.zIndex = '10'
   dragState = {
     kind: 'move',
     el,
-    offsetX: event.clientX - rect.left,
+    offsetX: Math.min(event.clientX - rect.left, Math.max(rect.width - 12, 12)),
     offsetY: event.clientY - rect.top
   }
 }
@@ -175,12 +179,18 @@ function applyDrag(event) {
   }
   const scale = (dragState.startWidth + event.clientX - dragState.startX) / dragState.startWidth
   const clamped = Math.max(0.05, scale)
-  if (el.classList.contains('image')) {
-    el.style.width = `${Math.max(24, Math.round(dragState.startWidth * clamped))}px`
-  } else {
+  if (el.classList.contains('text')) {
     const fontSize = Math.min(400, Math.max(8, dragState.startFontSize * clamped))
     el.style.fontSize = `${fontSize}px`
+  } else {
+    const minWidth = el.classList.contains('board') ? BOARD_MIN_WIDTH : 24
+    el.style.width = `${Math.max(minWidth, Math.round(dragState.startWidth * clamped))}px`
   }
+}
+
+function scaleTextSize(node, factor) {
+  const current = parseFloat(getComputedStyle(node).fontSize)
+  node.style.fontSize = `${Math.min(400, Math.max(8, current * factor))}px`
 }
 
 function finishTextEdit() {
@@ -189,7 +199,12 @@ function finishTextEdit() {
   editingContent = null
   content.contentEditable = 'false'
   if (content.textContent.trim() === '') {
-    content.closest('.el').remove()
+    const host = content.closest('.board-title, .item, .el')
+    if (host.classList.contains('board-title')) {
+      content.textContent = '未命名'
+    } else {
+      host.remove()
+    }
   }
   saveSnapshot()
 }
@@ -224,7 +239,13 @@ entryInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') {
     const value = entryInput.value.trim()
     if (value !== '') {
-      if (/^https?:\/\/\S+$/i.test(value)) {
+      if (value.startsWith('#')) {
+        const title = value.slice(1).trim()
+        if (title !== '') {
+          buildBoardElement({ title })
+          saveSnapshot()
+        }
+      } else if (/^https?:\/\/\S+$/i.test(value)) {
         addImageElement(value)
       } else {
         addTextElement(value)
@@ -253,8 +274,20 @@ function scheduleToolbarHide(target) {
 }
 
 document.addEventListener('mousemove', (event) => {
+  if (pendingItemDrag) {
+    const moved =
+      Math.abs(event.clientX - pendingItemDrag.x) + Math.abs(event.clientY - pendingItemDrag.y)
+    if (moved > 4) {
+      const el = detachItemToElement(pendingItemDrag.item)
+      pendingItemDrag = null
+      startDrag(el, event)
+      showToolbarFor(el)
+    }
+    return
+  }
   if (dragState) {
     applyDrag(event)
+    if (dragState.kind === 'move') updateDropIndicator(event, dragState.el)
     if (dragState.el === toolbarTarget) positionToolbar()
     return
   }
@@ -272,6 +305,12 @@ document.addEventListener('mousedown', (event) => {
     if (event.target !== editingContent) finishTextEdit()
     return
   }
+  const item = event.target.closest('.item')
+  if (item) {
+    pendingItemDrag = { item, x: event.clientX, y: event.clientY }
+    showToolbarFor(item)
+    return
+  }
   const el = event.target.closest('.el')
   if (!el) return
   startDrag(el, event)
@@ -279,22 +318,56 @@ document.addEventListener('mousedown', (event) => {
 })
 
 document.addEventListener('mouseup', () => {
-  if (dragState) saveSnapshot()
+  pendingItemDrag = null
+  if (dragState) {
+    dragState.el.style.zIndex = ''
+    if (dragState.kind === 'move' && dropTarget) {
+      const item = dropElementIntoBoard(dragState.el, dropTarget.board, dropTarget.before)
+      showToolbarFor(item)
+    }
+    clearDropIndicator()
+    saveSnapshot()
+  }
   dragState = null
 })
 
 document.addEventListener('dblclick', (event) => {
-  const el = event.target.closest('.el.text')
-  if (el) startTextEdit(el)
+  const target = event.target.closest('.board-title, .item.text, .el.text')
+  if (target) startTextEdit(target)
 })
 
 document.addEventListener('contextmenu', (event) => {
   if (event.target.closest('#toolbar')) return
   const el = event.target.closest('.el')
-  if (!el) return
+  if (!el || el.classList.contains('board')) return
   event.preventDefault()
   duplicateElement(el)
 })
+
+// 滾輪縮放:懸停就能調,不用先選中。板內項目調單條,標題列調整板。
+document.addEventListener(
+  'wheel',
+  (event) => {
+    if (editingContent || entryOpen || dragState || pendingItemDrag) return
+    const el = event.target.closest('.el')
+    if (!el) return
+    event.preventDefault()
+    const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1
+    const item = event.target.closest('.item')
+    if (el.classList.contains('board')) {
+      if (item && item.classList.contains('text')) scaleTextSize(item, factor)
+      else if (!item) scaleBoard(el, factor)
+    } else if (el.classList.contains('image')) {
+      el.style.width = `${Math.max(24, Math.round(el.offsetWidth * factor))}px`
+    } else {
+      scaleTextSize(el, factor)
+    }
+    if (toolbarVisible()) positionToolbar()
+    clearTimeout(wheelSaveTimer)
+    wheelSaveTimer = setTimeout(saveSnapshot, 300)
+  },
+  { passive: false }
+)
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && editingContent && !event.shiftKey) {
@@ -322,6 +395,7 @@ function restoreSnapshot(items) {
   items.forEach((item) => {
     if (item.kind === 'text') buildTextElement(item)
     else if (item.kind === 'image') buildImageElement(item)
+    else if (item.kind === 'board') buildBoardElement(item)
   })
   saveSnapshot()
 }

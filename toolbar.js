@@ -227,14 +227,17 @@ function syncToolbarState() {
 
 function showToolbarFor(el) {
   toolbarTarget = el
-  const isText = el.classList.contains('text')
+  const isBoard = el.classList.contains('board')
+  const isText = !isBoard && el.classList.contains('text')
+  const isImage = !isBoard && !isText
   swatchRow.style.display = isText ? '' : 'none'
   controlRow.style.display = isText ? '' : 'none'
   templateRow.style.display = isText ? '' : 'none'
-  urlRow.style.display = isText ? 'none' : ''
+  urlRow.style.display = isImage ? '' : 'none'
+  boardRow.style.display = isBoard ? '' : 'none'
   toolbar.style.display = 'flex'
   if (isText) syncToolbarState()
-  else urlInput.value = ''
+  if (isImage) urlInput.value = ''
   positionToolbar()
 }
 
@@ -280,9 +283,26 @@ urlInput.addEventListener('keydown', (event) => {
 urlRow.appendChild(urlInput)
 urlRow.appendChild(makeDeleteButton())
 
+// 板子工具列:換標題列顏色 + 整組刪
+const boardRow = document.createElement('div')
+boardRow.className = 'tb-row'
+COLORS.forEach((color) => {
+  const swatch = document.createElement('button')
+  swatch.className = 'swatch'
+  swatch.style.background = color
+  swatch.addEventListener('click', () => {
+    if (!toolbarTarget || !toolbarTarget.classList.contains('board')) return
+    applyBoardColor(toolbarTarget, color)
+    saveSnapshot()
+  })
+  boardRow.appendChild(swatch)
+})
+boardRow.appendChild(makeDeleteButton())
+
 toolbar.appendChild(swatchRow)
 toolbar.appendChild(controlRow)
 toolbar.appendChild(templateRow)
 toolbar.appendChild(urlRow)
+toolbar.appendChild(boardRow)
 document.body.appendChild(toolbar)
 renderTemplates()
