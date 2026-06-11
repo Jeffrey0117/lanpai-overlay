@@ -15,6 +15,7 @@ const fs = require('fs')
 
 let win = null
 let tray = null
+let onTop = true
 
 const pasteDir = path.join(app.getPath('temp'), 'lanpai-overlay-paste')
 
@@ -45,8 +46,8 @@ function createWindow() {
     }
   })
 
-  win.setAlwaysOnTop(true, 'screen-saver')
   win.setMenu(null)
+  win.setAlwaysOnTop(onTop, 'screen-saver')
   win.setIgnoreMouseEvents(true, { forward: true })
   win.loadFile('overlay.html')
 }
@@ -64,6 +65,18 @@ async function addImage() {
 function addSmart() {
   win.webContents.send('add-smart')
   win.focus()
+}
+
+function clearAll() {
+  if (win) win.webContents.send('clear-all')
+}
+
+// 置頂開關:釘在最前面 ↔ 放開讓它被蓋住。要可靠跳到最前面,那一下就得變成置頂
+function toggleTop() {
+  if (!win) return
+  onTop = !onTop
+  win.setAlwaysOnTop(onTop, 'screen-saver')
+  if (onTop) win.moveTop()
 }
 
 function pasteClipboardImage() {
@@ -94,8 +107,9 @@ function createTray() {
       { label: '加文字 / 圖片網址\tCtrl+Shift+Space', click: addSmart },
       { label: '貼剪貼簿圖片\tCtrl+Shift+V', click: pasteClipboardImage },
       { label: '加圖片(選檔)', click: addImage },
+      { label: '置頂 / 放開\tCtrl+Shift+↑', click: toggleTop },
       { type: 'separator' },
-      { label: '清空全部', click: () => win.webContents.send('clear-all') },
+      { label: '清空全部\tCtrl+Shift+X', click: clearAll },
       { type: 'separator' },
       { label: '結束', click: () => app.quit() }
     ])
@@ -117,11 +131,13 @@ app.whenReady().then(() => {
     }
   })
 
-  clearPasteDir()
+  // 不在開機時清暫存:萬一上次是當機,要留著剪貼簿圖片給「還原」用;正常結束才清(will-quit)
   createWindow()
   createTray()
   globalShortcut.register('CommandOrControl+Shift+Space', addSmart)
   globalShortcut.register('CommandOrControl+Shift+V', pasteClipboardImage)
+  globalShortcut.register('CommandOrControl+Shift+X', clearAll)
+  globalShortcut.register('CommandOrControl+Shift+Up', toggleTop)
 })
 
 app.on('will-quit', () => {

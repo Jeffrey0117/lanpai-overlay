@@ -9,6 +9,36 @@ let editingContent = null
 let dragState = null
 let cascade = 0
 let toolbarHideTimer = null
+let promptOpen = false
+
+// 當機/誤關復原:背景一直記快照,只有上次「沒善終」時才問要不要還原
+const SNAP_KEY = 'lanpai-snapshot'
+const ALIVE_KEY = 'lanpai-alive'
+
+function serializeElements() {
+  return [...document.querySelectorAll('.el')].map((el) => {
+    const x = parseFloat(el.style.left) || 0
+    const y = parseFloat(el.style.top) || 0
+    if (el.classList.contains('text')) {
+      const content = el.querySelector('.content')
+      return { kind: 'text', x, y, fontSize: el.style.fontSize, text: content.textContent, style: getElementStyle(el) }
+    }
+    const img = el.querySelector('img.content')
+    return { kind: 'image', x, y, width: el.style.width, src: img.dataset.lastGood || img.src }
+  })
+}
+
+function saveSnapshot() {
+  try {
+    localStorage.setItem(SNAP_KEY, JSON.stringify(serializeElements()))
+  } catch (error) {
+    // localStorage 滿了或不可用就跳過,不影響使用
+  }
+}
+
+function clearSnapshot() {
+  localStorage.removeItem(SNAP_KEY)
+}
 
 function setInteractive(on) {
   if (on === interactive) return
@@ -17,7 +47,7 @@ function setInteractive(on) {
 }
 
 function shouldBeInteractive(target) {
-  if (entryOpen || editingContent || dragState || toolbarVisible()) return true
+  if (promptOpen || entryOpen || editingContent || dragState || toolbarVisible()) return true
   if (!(target instanceof Element)) return false
   return Boolean(target.closest('.el, #toolbar'))
 }
@@ -31,24 +61,29 @@ function nextPosition() {
   }
 }
 
-function createElement(type) {
-  const el = document.createElement('div')
-  el.className = `el ${type}`
-  const { x, y } = nextPosition()
-  el.style.left = `${x}px`
-  el.style.top = `${y}px`
-  return el
+function placeElement(el, x, y) {
+  const pos = x == null || y == null ? nextPosition() : { x, y }
+  el.style.left = `${pos.x}px`
+  el.style.top = `${pos.y}px`
 }
 
-function addTextElement(text) {
-  const el = createElement('text')
-  el.style.fontSize = '32px'
+function buildTextElement({ text, x, y, fontSize, style }) {
+  const el = document.createElement('div')
+  el.className = 'el text'
+  placeElement(el, x, y)
+  el.style.fontSize = fontSize || '32px'
   const content = document.createElement('span')
   content.className = 'content'
   content.textContent = text
   el.appendChild(content)
   appendWithHandle(el)
-  applyStyleTo(el, getCurrentStyle())
+  applyStyleTo(el, style || getCurrentStyle())
+  return el
+}
+
+function addTextElement(text) {
+  buildTextElement({ text })
+  saveSnapshot()
 }
 
 function toFileUrl(filePath) {
@@ -56,8 +91,11 @@ function toFileUrl(filePath) {
   return `file:///${encodeURI(normalized).replace(/#/g, '%23')}`
 }
 
-function addImageElement(source) {
-  const el = createElement('image')
+function buildImageElement({ src, x, y, width }) {
+  const el = document.createElement('div')
+  el.className = 'el image'
+  placeElement(el, x, y)
+  if (width) el.style.width = width
   const img = document.createElement('img')
   img.className = 'content'
   img.addEventListener('error', () => {
@@ -68,15 +106,37 @@ function addImageElement(source) {
     }
   })
   img.addEventListener('load', () => {
-    if (!img.dataset.lastGood) {
+    if (!img.dataset.lastGood && !width) {
       const maxWidth = Math.round(window.innerWidth * 0.4)
       el.style.width = `${Math.min(img.naturalWidth, maxWidth)}px`
     }
     img.dataset.lastGood = img.src
+    saveSnapshot()
   })
-  img.src = /^(https?|data):/i.test(source) ? source : toFileUrl(source)
+  img.src = /^(file|https?|data):/i.test(src) ? src : toFileUrl(src)
   el.appendChild(img)
   appendWithHandle(el)
+  return el
+}
+
+function addImageElement(source) {
+  buildImageElement({ src: source })
+}
+
+function duplicateElement(el) {
+  const x = (parseFloat(el.style.left) || 0) + 24
+  const y = (parseFloat(el.style.top) || 0) + 24
+  let copy
+  if (el.classList.contains('text')) {
+    const content = el.querySelector('.content')
+    copy = buildTextElement({ text: content.textContent, x, y, fontSize: el.style.fontSize, style: getElementStyle(el) })
+  } else {
+    const img = el.querySelector('img.content')
+    copy = buildImageElement({ src: img.dataset.lastGood || img.src, x, y, width: el.style.width })
+  }
+  saveSnapshot()
+  setInteractive(true)
+  showToolbarFor(copy)
 }
 
 function appendWithHandle(el) {
@@ -131,6 +191,7 @@ function finishTextEdit() {
   if (content.textContent.trim() === '') {
     content.closest('.el').remove()
   }
+  saveSnapshot()
 }
 
 function startTextEdit(el) {
@@ -218,6 +279,7 @@ document.addEventListener('mousedown', (event) => {
 })
 
 document.addEventListener('mouseup', () => {
+  if (dragState) saveSnapshot()
   dragState = null
 })
 
@@ -231,9 +293,7 @@ document.addEventListener('contextmenu', (event) => {
   const el = event.target.closest('.el')
   if (!el) return
   event.preventDefault()
-  if (el === toolbarTarget) hideToolbar()
-  el.remove()
-  setInteractive(false)
+  duplicateElement(el)
 })
 
 document.addEventListener('keydown', (event) => {
@@ -249,6 +309,7 @@ document.addEventListener('keydown', (event) => {
     hideToolbar()
     el.remove()
     setInteractive(false)
+    saveSnapshot()
   }
 })
 
@@ -257,10 +318,73 @@ window.addEventListener('blur', () => {
   if (entryOpen) closeEntry()
 })
 
+function restoreSnapshot(items) {
+  items.forEach((item) => {
+    if (item.kind === 'text') buildTextElement(item)
+    else if (item.kind === 'image') buildImageElement(item)
+  })
+  saveSnapshot()
+}
+
+function showRestorePrompt(items) {
+  promptOpen = true
+  setInteractive(true)
+  const panel = document.createElement('div')
+  panel.id = 'restore-prompt'
+
+  const msg = document.createElement('div')
+  msg.className = 'rp-msg'
+  msg.textContent = `上次沒正常關閉,要還原剛剛的 ${items.length} 個項目嗎?`
+
+  const row = document.createElement('div')
+  row.className = 'rp-row'
+  const yes = document.createElement('button')
+  yes.className = 'rp-btn rp-yes'
+  yes.textContent = '還原'
+  const no = document.createElement('button')
+  no.className = 'rp-btn'
+  no.textContent = '清掉'
+
+  function dismiss() {
+    promptOpen = false
+    panel.remove()
+    setInteractive(false)
+  }
+  yes.addEventListener('click', () => {
+    restoreSnapshot(items)
+    dismiss()
+  })
+  no.addEventListener('click', () => {
+    clearSnapshot()
+    dismiss()
+  })
+
+  row.appendChild(yes)
+  row.appendChild(no)
+  panel.appendChild(msg)
+  panel.appendChild(row)
+  document.body.appendChild(panel)
+}
+
+function initRestore() {
+  const unclean = localStorage.getItem(ALIVE_KEY) === '1'
+  localStorage.setItem(ALIVE_KEY, '1')
+  if (!unclean) return
+  const items = parseJson(localStorage.getItem(SNAP_KEY), [])
+  if (Array.isArray(items) && items.length) showRestorePrompt(items)
+}
+
+window.addEventListener('pagehide', () => {
+  localStorage.setItem(ALIVE_KEY, '0')
+})
+
 api.onAddSmart(() => openEntry())
 api.onAddImage(addImageElement)
 api.onClearAll(() => {
   hideToolbar()
   document.querySelectorAll('.el').forEach((el) => el.remove())
   setInteractive(false)
+  clearSnapshot()
 })
+
+initRestore()

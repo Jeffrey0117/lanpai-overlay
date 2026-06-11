@@ -146,6 +146,75 @@
         outline: 1px solid rgba(120, 180, 255, 0.9);
       }
 
+      .tb-icon {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 24px;
+        padding: 0;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: rgba(255, 255, 255, 0.85);
+        cursor: pointer;
+      }
+
+      .tb-icon:hover {
+        color: #ff6b6b;
+        border-color: rgba(255, 107, 107, 0.85);
+        background: rgba(255, 107, 107, 0.12);
+      }
+
+      #restore-prompt {
+        position: absolute;
+        left: 50%;
+        top: 32%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px 22px;
+        background: rgba(20, 20, 20, 0.94);
+        border: 1px solid rgba(120, 180, 255, 0.5);
+        border-radius: 12px;
+        z-index: 99999;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      }
+
+      #restore-prompt .rp-msg {
+        color: #fff;
+        font-size: 15px;
+      }
+
+      #restore-prompt .rp-row {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      #restore-prompt .rp-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 7px;
+        padding: 6px 16px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      #restore-prompt .rp-btn.rp-yes {
+        background: rgba(120, 180, 255, 0.9);
+        color: #07101f;
+        border-color: transparent;
+        font-weight: 600;
+      }
+
+      #restore-prompt .rp-btn:hover {
+        outline: 1px solid rgba(120, 180, 255, 0.9);
+      }
+
       #text-entry input {
         width: 420px;
         padding: 12px 16px;

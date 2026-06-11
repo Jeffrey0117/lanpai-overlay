@@ -1,6 +1,6 @@
 {
   "name": "lanpai-overlay",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Transparent on-screen overlay for text and images",
   "private": true,
   "main": "main.js",
@@ -10,7 +10,7 @@
     "dist": "electron-builder --win"
   },
   "devDependencies": {
-    "electron": "^36.0.0",
+    "electron": "^36.9.5",
     "electron-builder": "^26.15.2"
   },
   "build": {
@@ -27,8 +27,18 @@
     ],
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "nsis": {

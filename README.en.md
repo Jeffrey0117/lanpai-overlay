@@ -51,11 +51,11 @@ At no point did a "window" appear.
 `Ctrl+Shift+V` pins whatever image is in your clipboard. Pairs with `Win+Shift+S` for a two-second see-it-pin-it flow. Image URL in clipboard? Also works.
 
 ### Hands-on elements, invisible everywhere else
-Over an element: drag to move, pull the corner handle to scale, double-click to edit, Del or right-click to remove.
+Over an element: drag to move, pull the corner handle to scale, double-click to edit, right-click to duplicate, Del or the trash icon to remove.
 Over empty space: the layer is fully click-through. Your clicks land on whatever is underneath.
 
 ### Style panel with shadows that never clash
-Click any text: 7 color swatches, 3 weights, 4 shadow styles, 3 backdrops (none / dark / light, padded wider than the text).
+Click any text: 7 color swatches, 3 weights, 4 shadow styles, and a backdrop that cycles through the same 7 colors (none → white → black → yellow…), padded wider than the text.
 Shadow color auto-contrasts — dark text gets a white shadow, light text gets a black one. Zero settings.
 Save styles as templates (T1, T2…) that survive restarts. Content itself is ephemeral by design — no scene files.
 
@@ -65,6 +65,10 @@ An image's panel is a URL field: paste, Enter, swapped — position and size pre
 ---
 
 ## Quick Start
+
+**Fastest: just run it** — grab the installer or portable build from [Releases](https://github.com/Jeffrey0117/lanpai-overlay/releases/latest) (Windows x64, no Node.js needed).
+
+Or from source:
 
 ```bash
 git clone https://github.com/Jeffrey0117/lanpai-overlay.git
@@ -81,6 +85,8 @@ Nothing appears on launch — that's by design. The blue dot in your system tray
 |---|---|
 | `Ctrl+Shift+Space` | Smart input (text / image URL) |
 | `Ctrl+Shift+V` | Pin clipboard image |
+| `Ctrl+Shift+X` | Clear everything |
+| `Ctrl+Shift+↑` | Toggle topmost (pin to front ↔ let it be covered) |
 | `Del` | Delete selected element |
 | `Esc` | Close input |
 
@@ -92,7 +98,8 @@ Nothing appears on launch — that's by design. The blue dot in your system tray
 | Pull corner handle | Scale (font size for text, proportional for images) |
 | Click | Open style panel |
 | Double-click text | Edit in place |
-| Right-click element | Delete |
+| Right-click element | Duplicate |
+| Trash icon / `Del` | Delete |
 | Right-click template chip | Delete that template |
 
 ---
@@ -125,8 +132,9 @@ Successor to [lanpai-blueplan](https://github.com/Jeffrey0117/lanpai-blueplan) (
 - [x] Transparent overlay + tray
 - [x] Global hotkeys + clipboard pin
 - [x] Style panel + templates
-- [x] Text backdrops
-- [ ] Portable exe packaging (electron-builder)
+- [x] Color backdrops
+- [x] Portable + installer packaging (electron-builder)
+- [x] Crash / accidental-close recovery
 - [ ] Multi-monitor support
 - [ ] Custom hotkeys
 

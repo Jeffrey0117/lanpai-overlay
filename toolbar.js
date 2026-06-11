@@ -26,11 +26,30 @@ function shadowContrastColor(hex) {
   return luminance < 0.45 ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.9)'
 }
 
-const BACKGROUNDS = [
-  { key: 'none', label: '無底', css: 'transparent' },
-  { key: 'dark', label: '黑底', css: 'rgba(0, 0, 0, 0.65)' },
-  { key: 'light', label: '白底', css: 'rgba(255, 255, 255, 0.85)' }
-]
+// 底色:無 + 跟文字同一排顏色,點一下跳下一個。即時預覽,常用就存模板。
+const BG_NONE = 'none'
+const BG_ALPHA = 0.82
+const BG_CYCLE = [BG_NONE, ...COLORS]
+const LEGACY_BG = { dark: '#111111', light: '#ffffff' }
+
+function hexToRgba(hex, alpha) {
+  const v = hex.replace('#', '')
+  const r = parseInt(v.slice(0, 2), 16)
+  const g = parseInt(v.slice(2, 4), 16)
+  const b = parseInt(v.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+function normalizeBg(bg) {
+  if (!bg || bg === BG_NONE) return BG_NONE
+  if (LEGACY_BG[bg]) return LEGACY_BG[bg]
+  return /^#[0-9a-fA-F]{6}$/.test(bg) ? bg : BG_NONE
+}
+
+function bgCss(bg) {
+  const norm = normalizeBg(bg)
+  return norm === BG_NONE ? 'transparent' : hexToRgba(norm, BG_ALPHA)
+}
 
 const DEFAULT_STYLE = { color: '#ffffff', weight: 700, shadow: 'soft', bg: 'none' }
 const MAX_TEMPLATES = 6
@@ -75,13 +94,13 @@ function applyStyleTo(el, style) {
   el.dataset.style = JSON.stringify(merged)
   const content = el.querySelector('.content')
   const shadow = SHADOWS.find((s) => s.key === merged.shadow) || SHADOWS[1]
-  const bg = BACKGROUNDS.find((b) => b.key === merged.bg) || BACKGROUNDS[0]
+  const hasBg = normalizeBg(merged.bg) !== BG_NONE
   content.style.color = merged.color
   content.style.fontWeight = String(merged.weight)
   content.style.textShadow = shadow.css(shadowContrastColor(merged.color))
-  content.style.background = bg.css
-  content.style.padding = merged.bg === 'none' ? '0' : '0.2em 0.45em'
-  content.style.borderRadius = merged.bg === 'none' ? '0' : '0.18em'
+  content.style.background = bgCss(merged.bg)
+  content.style.padding = hasBg ? '0.2em 0.45em' : '0'
+  content.style.borderRadius = hasBg ? '0.18em' : '0'
 }
 
 function updateTargetStyle(patch) {
@@ -95,6 +114,25 @@ function updateTargetStyle(patch) {
 const toolbar = document.createElement('div')
 toolbar.id = 'toolbar'
 
+const TRASH_SVG =
+  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>'
+
+function makeDeleteButton() {
+  const btn = document.createElement('button')
+  btn.className = 'tb-icon tb-del'
+  btn.title = '刪除 (Del)'
+  btn.innerHTML = TRASH_SVG
+  btn.addEventListener('click', () => {
+    if (!toolbarTarget) return
+    const el = toolbarTarget
+    hideToolbar()
+    el.remove()
+    setInteractive(false)
+    saveSnapshot()
+  })
+  return btn
+}
+
 const swatchRow = document.createElement('div')
 swatchRow.className = 'tb-row'
 COLORS.forEach((color) => {
@@ -105,6 +143,7 @@ COLORS.forEach((color) => {
   swatch.addEventListener('click', () => updateTargetStyle({ color }))
   swatchRow.appendChild(swatch)
 })
+swatchRow.appendChild(makeDeleteButton())
 
 const weightBtn = document.createElement('button')
 weightBtn.className = 'tb-btn'
@@ -131,9 +170,9 @@ bgBtn.className = 'tb-btn'
 bgBtn.addEventListener('click', () => {
   if (!toolbarTarget) return
   const { bg } = getElementStyle(toolbarTarget)
-  const index = BACKGROUNDS.findIndex((b) => b.key === bg)
-  const next = BACKGROUNDS[(index + 1) % BACKGROUNDS.length]
-  updateTargetStyle({ bg: next.key })
+  const index = BG_CYCLE.indexOf(normalizeBg(bg))
+  const next = BG_CYCLE[(index + 1) % BG_CYCLE.length]
+  updateTargetStyle({ bg: next })
 })
 
 const saveBtn = document.createElement('button')
@@ -172,10 +211,18 @@ function syncToolbarState() {
   const style = getElementStyle(toolbarTarget)
   const weight = WEIGHTS.find((w) => w.value === style.weight) || WEIGHTS[1]
   const shadow = SHADOWS.find((s) => s.key === style.shadow) || SHADOWS[1]
-  const bg = BACKGROUNDS.find((b) => b.key === style.bg) || BACKGROUNDS[0]
   weightBtn.textContent = weight.label
   shadowBtn.textContent = shadow.label
-  bgBtn.textContent = bg.label
+  const bgNorm = normalizeBg(style.bg)
+  if (bgNorm === BG_NONE) {
+    bgBtn.textContent = '無底'
+    bgBtn.style.background = ''
+    bgBtn.style.color = ''
+  } else {
+    bgBtn.textContent = '底色'
+    bgBtn.style.background = hexToRgba(bgNorm, BG_ALPHA)
+    bgBtn.style.color = shadowContrastColor(bgNorm)
+  }
 }
 
 function showToolbarFor(el) {
@@ -231,6 +278,7 @@ urlInput.addEventListener('keydown', (event) => {
   urlInput.value = ''
 })
 urlRow.appendChild(urlInput)
+urlRow.appendChild(makeDeleteButton())
 
 toolbar.appendChild(swatchRow)
 toolbar.appendChild(controlRow)
