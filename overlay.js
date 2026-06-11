@@ -10,12 +10,10 @@ let dragState = null
 let pendingItemDrag = null
 let cascade = 0
 let toolbarHideTimer = null
-let promptOpen = false
 let wheelSaveTimer = null
 
-// 當機/誤關復原:背景一直記快照,只有上次「沒善終」時才問要不要還原
+// 筆記就該記得:背景一直記快照,每次開啟靜默還原。要從零開始用 Ctrl+Shift+X。
 const SNAP_KEY = 'lanpai-snapshot'
-const ALIVE_KEY = 'lanpai-alive'
 
 function serializeElements() {
   return [...document.querySelectorAll('.el')].map((el) => {
@@ -50,7 +48,7 @@ function setInteractive(on) {
 }
 
 function shouldBeInteractive(target) {
-  if (promptOpen || entryOpen || editingContent || dragState || toolbarVisible()) return true
+  if (entryOpen || editingContent || dragState || toolbarVisible()) return true
   if (!(target instanceof Element)) return false
   return Boolean(target.closest('.el, #toolbar'))
 }
@@ -305,6 +303,7 @@ document.addEventListener('mousedown', (event) => {
     if (event.target !== editingContent) finishTextEdit()
     return
   }
+  if (event.target.closest('.board-fold')) return
   const item = event.target.closest('.item')
   if (item) {
     pendingItemDrag = { item, x: event.clientX, y: event.clientY }
@@ -332,6 +331,7 @@ document.addEventListener('mouseup', () => {
 })
 
 document.addEventListener('dblclick', (event) => {
+  if (event.target.closest('.board-fold')) return
   const target = event.target.closest('.board-title, .item.text, .el.text')
   if (target) startTextEdit(target)
 })
@@ -406,57 +406,10 @@ function restoreSnapshot(items) {
   saveSnapshot()
 }
 
-function showRestorePrompt(items) {
-  promptOpen = true
-  setInteractive(true)
-  const panel = document.createElement('div')
-  panel.id = 'restore-prompt'
-
-  const msg = document.createElement('div')
-  msg.className = 'rp-msg'
-  msg.textContent = `上次沒正常關閉,要還原剛剛的 ${items.length} 個項目嗎?`
-
-  const row = document.createElement('div')
-  row.className = 'rp-row'
-  const yes = document.createElement('button')
-  yes.className = 'rp-btn rp-yes'
-  yes.textContent = '還原'
-  const no = document.createElement('button')
-  no.className = 'rp-btn'
-  no.textContent = '清掉'
-
-  function dismiss() {
-    promptOpen = false
-    panel.remove()
-    setInteractive(false)
-  }
-  yes.addEventListener('click', () => {
-    restoreSnapshot(items)
-    dismiss()
-  })
-  no.addEventListener('click', () => {
-    clearSnapshot()
-    dismiss()
-  })
-
-  row.appendChild(yes)
-  row.appendChild(no)
-  panel.appendChild(msg)
-  panel.appendChild(row)
-  document.body.appendChild(panel)
-}
-
 function initRestore() {
-  const unclean = localStorage.getItem(ALIVE_KEY) === '1'
-  localStorage.setItem(ALIVE_KEY, '1')
-  if (!unclean) return
   const items = parseJson(localStorage.getItem(SNAP_KEY), [])
-  if (Array.isArray(items) && items.length) showRestorePrompt(items)
+  if (Array.isArray(items) && items.length) restoreSnapshot(items)
 }
-
-window.addEventListener('pagehide', () => {
-  localStorage.setItem(ALIVE_KEY, '0')
-})
 
 api.onAddSmart(() => openEntry())
 api.onAddImage(addImageElement)

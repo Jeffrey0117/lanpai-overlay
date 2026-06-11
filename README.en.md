@@ -57,13 +57,13 @@ Over empty space: the layer is fully click-through. Your clicks land on whatever
 ### Style panel with shadows that never clash
 Click any text: 7 color swatches, 3 weights, 4 shadow styles, and a backdrop that cycles through the same 7 colors (none → white → black → yellow…), padded wider than the text.
 Shadow color auto-contrasts — dark text gets a white shadow, light text gets a black one. Zero settings.
-Save styles as templates (T1, T2…) that survive restarts. Content itself is ephemeral by design — no scene files.
+Save styles as templates (T1, T2…) that survive restarts. Content survives restarts too — everything on the wall is back when you reopen, and `Ctrl+Shift+X` wipes the slate. No scene files to manage.
 
 ### Swap images in place
 An image's panel is a URL field: paste, Enter, swapped — position and size preserved. Bad URL? It rolls back.
 
 ### Boards: group notes together
-Type `#Today` in the input box to spawn a titled board. Drag loose notes onto it and they snap into a vertical list; drag them out to set them free again. Drag the title bar to move the whole group, double-click it to rename, recolor it from its panel, and `Del` removes the board with everything in it. Scroll over one item to resize just that line, or over the title bar to scale the whole board.
+Type `#Today` in the input box to spawn a titled board. Drag loose notes onto it and they snap into a vertical list; drag them out to set them free again. Drag the title bar to move the whole group, double-click it to rename, recolor it from its panel, and `Del` removes the board with everything in it. Scroll over one item to resize just that line, or over the title bar to scale the whole board. Click the ▾ on the title bar to collapse the board down to a single line.
 
 ---
 

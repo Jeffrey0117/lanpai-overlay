@@ -38,18 +38,24 @@ function buildBoardItem(data) {
   return item
 }
 
-function buildBoardElement({ title, x, y, width, color, titleFontSize, items }) {
+function buildBoardElement({ title, x, y, width, color, titleFontSize, items, collapsed }) {
   const el = document.createElement('div')
   el.className = 'el board'
+  if (collapsed) el.classList.add('collapsed')
   placeElement(el, x, y)
   el.style.width = width || `${BOARD_DEFAULT_WIDTH}px`
 
   const titleBar = document.createElement('div')
   titleBar.className = 'board-title'
   titleBar.style.fontSize = titleFontSize || BOARD_TITLE_FONT
+  const fold = document.createElement('span')
+  fold.className = 'board-fold'
+  fold.title = '摺疊 / 展開'
+  fold.addEventListener('click', () => toggleBoardCollapsed(el))
   const titleContent = document.createElement('span')
   titleContent.className = 'content'
   titleContent.textContent = title
+  titleBar.appendChild(fold)
   titleBar.appendChild(titleContent)
   el.appendChild(titleBar)
 
@@ -60,7 +66,18 @@ function buildBoardElement({ title, x, y, width, color, titleFontSize, items }) 
 
   appendWithHandle(el)
   applyBoardColor(el, color || BOARD_DEFAULT_COLOR)
+  syncFold(el)
   return el
+}
+
+function syncFold(board) {
+  board.querySelector('.board-fold').textContent = board.classList.contains('collapsed') ? '▸' : '▾'
+}
+
+function toggleBoardCollapsed(board) {
+  board.classList.toggle('collapsed')
+  syncFold(board)
+  saveSnapshot()
 }
 
 function serializeBoardItem(item) {
@@ -82,6 +99,7 @@ function serializeBoard(board) {
     title: titleBar.querySelector('.content').textContent,
     color: board.dataset.color || BOARD_DEFAULT_COLOR,
     titleFontSize: titleBar.style.fontSize,
+    collapsed: board.classList.contains('collapsed'),
     items: [...board.querySelectorAll('.item')].map(serializeBoardItem)
   }
 }
@@ -117,7 +135,7 @@ function dropElementIntoBoard(el, board, before) {
 
 function findDropTarget(event, dragged) {
   for (const board of document.querySelectorAll('.el.board')) {
-    if (board === dragged) continue
+    if (board === dragged || board.classList.contains('collapsed')) continue
     const rect = board.getBoundingClientRect()
     const inside =
       event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom

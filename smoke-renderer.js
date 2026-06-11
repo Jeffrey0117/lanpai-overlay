@@ -60,5 +60,22 @@
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }))
   assert('Del removes whole board', !document.body.contains(board))
 
+  // 摺疊:點 ▾ 收合、序列化記得、再點展開
+  const foldBoard = buildBoardElement({ title: '摺疊測試', x: 300, y: 300, items: [{ kind: 'text', text: 'inside' }] })
+  foldBoard.querySelector('.board-fold').click()
+  assert('fold hides items', getComputedStyle(foldBoard.querySelector('.board-items')).display === 'none')
+  assert('collapsed state serialized', serializeElements().some((s) => s.kind === 'board' && s.collapsed))
+  foldBoard.querySelector('.board-fold').click()
+  assert('fold reopens items', getComputedStyle(foldBoard.querySelector('.board-items')).display !== 'none')
+
+  // 靜默還原:清空 DOM 後從快照重建
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  localStorage.setItem(SNAP_KEY, JSON.stringify([{ kind: 'text', text: 'persist', x: 10, y: 10 }]))
+  initRestore()
+  assert(
+    'silent restore on launch',
+    [...document.querySelectorAll('.el.text .content')].some((c) => c.textContent === 'persist')
+  )
+
   return JSON.stringify(results, null, 2)
 })()
