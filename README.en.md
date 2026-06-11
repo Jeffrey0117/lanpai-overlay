@@ -62,6 +62,9 @@ Save styles as templates (T1, T2…) that survive restarts. Content itself is ep
 ### Swap images in place
 An image's panel is a URL field: paste, Enter, swapped — position and size preserved. Bad URL? It rolls back.
 
+### Boards: group notes together
+Type `#Today` in the input box to spawn a titled board. Drag loose notes onto it and they snap into a vertical list; drag them out to set them free again. Drag the title bar to move the whole group, double-click it to rename, recolor it from its panel, and `Del` removes the board with everything in it. Scroll over one item to resize just that line, or over the title bar to scale the whole board.
+
 ---
 
 ## Quick Start
@@ -96,6 +99,7 @@ Nothing appears on launch — that's by design. The blue dot in your system tray
 |---|---|
 | Drag element | Move |
 | Pull corner handle | Scale (font size for text, proportional for images) |
+| Hover + scroll wheel | Scale (the lazy way) |
 | Click | Open style panel |
 | Double-click text | Edit in place |
 | Right-click element | Duplicate |
