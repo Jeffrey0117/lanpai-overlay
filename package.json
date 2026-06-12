@@ -25,6 +25,7 @@
       "overlay.js",
       "toolbar.js",
       "board.js",
+      "history.js",
       "assets/**/*"
     ],
     "win": {

@@ -31,14 +31,12 @@ function serializeElements() {
 
 function saveSnapshot() {
   try {
-    localStorage.setItem(SNAP_KEY, JSON.stringify(serializeElements()))
+    const json = JSON.stringify(serializeElements())
+    localStorage.setItem(SNAP_KEY, json)
+    pushHistory(json)
   } catch (error) {
     // localStorage 滿了或不可用就跳過,不影響使用
   }
-}
-
-function clearSnapshot() {
-  localStorage.removeItem(SNAP_KEY)
 }
 
 function setInteractive(on) {
@@ -48,7 +46,7 @@ function setInteractive(on) {
 }
 
 function shouldBeInteractive(target) {
-  if (entryOpen || editingContent || dragState || toolbarVisible()) return true
+  if (entryOpen || editingContent || dragState || toolbarVisible() || historyOpen) return true
   if (!(target instanceof Element)) return false
   return Boolean(target.closest('.el, #toolbar'))
 }
@@ -377,6 +375,12 @@ document.addEventListener('keydown', (event) => {
     return
   }
   const typing = editingContent || entryOpen || event.target instanceof HTMLInputElement
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !typing) {
+    event.preventDefault()
+    if (event.shiftKey) redo()
+    else undo()
+    return
+  }
   if (event.key === 'Delete' && toolbarTarget && !typing) {
     const el = toolbarTarget
     hideToolbar()
@@ -417,7 +421,9 @@ api.onClearAll(() => {
   hideToolbar()
   document.querySelectorAll('.el').forEach((el) => el.remove())
   setInteractive(false)
-  clearSnapshot()
+  saveSnapshot()
 })
+api.onUndo(undo)
+api.onShowHistory(showHistoryPanel)
 
 initRestore()

@@ -233,6 +233,69 @@
         background: rgba(255, 107, 107, 0.12);
       }
 
+      #history-panel {
+        position: absolute;
+        left: 50%;
+        top: 32%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 340px;
+        padding: 16px 18px;
+        background: rgba(20, 20, 20, 0.94);
+        border: 1px solid rgba(120, 180, 255, 0.5);
+        border-radius: 12px;
+        z-index: 99999;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      }
+
+      #history-panel .hp-title {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      #history-panel .hp-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-height: 45vh;
+        overflow-y: auto;
+      }
+
+      #history-panel .hp-row {
+        text-align: left;
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 7px;
+        padding: 6px 10px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      #history-panel .hp-row:hover {
+        outline: 1px solid rgba(120, 180, 255, 0.9);
+      }
+
+      #history-panel .hp-empty {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 13px;
+        padding: 6px 2px;
+      }
+
+      #history-panel .hp-close {
+        align-self: flex-end;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 7px;
+        padding: 5px 14px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
       #text-entry input {
         width: 420px;
         padding: 12px 16px;
@@ -251,6 +314,7 @@
     </div>
     <script src="toolbar.js"></script>
     <script src="board.js"></script>
+    <script src="history.js"></script>
     <script src="overlay.js"></script>
   </body>
 </html>

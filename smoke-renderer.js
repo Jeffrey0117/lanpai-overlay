@@ -77,5 +77,34 @@
     [...document.querySelectorAll('.el.text .content')].some((c) => c.textContent === 'persist')
   )
 
+  // Undo / Redo
+  const wallTexts = () => [...document.querySelectorAll('body > .el.text .content')].map((c) => c.textContent)
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  addTextElement('undo-A')
+  addTextElement('undo-B')
+  undo()
+  assert('undo removes B keeps A', wallTexts().includes('undo-A') && !wallTexts().includes('undo-B'))
+  redo()
+  assert('redo brings B back', wallTexts().includes('undo-B'))
+  undo()
+  addTextElement('undo-C')
+  assert(
+    'edit after undo branches cleanly',
+    wallTexts().includes('undo-A') && wallTexts().includes('undo-C') && !wallTexts().includes('undo-B')
+  )
+
+  // 清空全部也能 Ctrl+Z 救回
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  saveSnapshot()
+  assert('clear-all leaves empty wall', wallTexts().length === 0)
+  undo()
+  assert('undo resurrects after clear-all', wallTexts().includes('undo-C'))
+
+  // 歷史面板
+  showHistoryPanel()
+  assert('history panel lists versions', document.querySelectorAll('#history-panel .hp-row').length > 0)
+  closeHistoryPanel()
+  assert('history panel closes', !document.getElementById('history-panel'))
+
   return JSON.stringify(results, null, 2)
 })()

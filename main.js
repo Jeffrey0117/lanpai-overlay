@@ -109,6 +109,15 @@ function createTray() {
       { label: '加圖片(選檔)', click: addImage },
       { label: '置頂 / 放開\tCtrl+Shift+↑', click: toggleTop },
       { type: 'separator' },
+      { label: '復原上一步\tCtrl+Z', click: () => win.webContents.send('undo') },
+      {
+        label: '還原較早版本',
+        click: () => {
+          win.webContents.send('show-history')
+          win.focus()
+        }
+      },
+      { type: 'separator' },
       { label: '清空全部\tCtrl+Shift+X', click: clearAll },
       { type: 'separator' },
       { label: '結束', click: () => app.quit() }
