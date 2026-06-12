@@ -104,11 +104,11 @@ function serializeBoard(board) {
   }
 }
 
-// 板內項目 ↔ 自由便籤 互轉:拖出去變自由,拖進來變清單項目
-function detachItemToElement(item) {
+// 板內項目 ↔ 自由便籤 互轉:拖出去變自由,拖進來變清單項目。keepOriginal = Alt+拖曳複製。
+function detachItemToElement(item, keepOriginal) {
   const rect = item.getBoundingClientRect()
   const data = serializeBoardItem(item)
-  item.remove()
+  if (!keepOriginal) item.remove()
   if (data.kind === 'text') {
     return buildTextElement({ ...data, x: rect.left, y: rect.top })
   }

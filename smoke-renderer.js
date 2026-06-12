@@ -100,6 +100,28 @@
   undo()
   assert('undo resurrects after clear-all', wallTexts().includes('undo-C'))
 
+  // 右鍵 = 刪除,Ctrl+Z 救回
+  addTextElement('rc-del')
+  const rcNote = [...document.querySelectorAll('body > .el.text')].find(
+    (el) => el.querySelector('.content').textContent === 'rc-del'
+  )
+  rcNote.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))
+  assert('right-click deletes element', !document.body.contains(rcNote))
+  undo()
+  assert('undo revives right-click delete', wallTexts().includes('rc-del'))
+
+  // Alt+拖曳 = 拖出分身
+  const srcNote = [...document.querySelectorAll('body > .el.text')].find(
+    (el) => el.querySelector('.content').textContent === 'rc-del'
+  )
+  const sr = srcNote.getBoundingClientRect()
+  srcNote.dispatchEvent(
+    new MouseEvent('mousedown', { bubbles: true, button: 0, altKey: true, clientX: sr.left + 4, clientY: sr.top + 4 })
+  )
+  document.dispatchEvent(new MouseEvent('mousemove', { clientX: sr.left + 150, clientY: sr.top + 150 }))
+  document.dispatchEvent(new MouseEvent('mouseup', {}))
+  assert('alt-drag duplicates note', wallTexts().filter((t) => t === 'rc-del').length === 2)
+
   // 歷史面板
   showHistoryPanel()
   assert('history panel lists versions', document.querySelectorAll('#history-panel .hp-row').length > 0)

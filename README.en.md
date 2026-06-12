@@ -103,7 +103,8 @@ Nothing appears on launch — that's by design. The blue dot in your system tray
 | Hover + scroll wheel | Scale (the lazy way) |
 | Click | Open style panel |
 | Double-click text | Edit in place |
-| Right-click element | Duplicate |
+| `Alt`+drag | Drag out a duplicate (works on whole boards too) |
+| Right-click element | Delete (`Ctrl+Z` if you slip) |
 | Trash icon / `Del` | Delete |
 | Right-click template chip | Delete that template |
 

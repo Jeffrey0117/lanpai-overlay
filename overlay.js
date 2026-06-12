@@ -122,20 +122,19 @@ function addImageElement(source) {
   buildImageElement({ src: source })
 }
 
-function duplicateElement(el) {
-  const x = (parseFloat(el.style.left) || 0) + 24
-  const y = (parseFloat(el.style.top) || 0) + 24
-  let copy
+// Alt+拖曳用:原地長出一個分身,讓呼叫端拖走
+function cloneElement(el) {
+  const x = parseFloat(el.style.left) || 0
+  const y = parseFloat(el.style.top) || 0
+  if (el.classList.contains('board')) {
+    return buildBoardElement({ ...serializeBoard(el), x, y })
+  }
   if (el.classList.contains('text')) {
     const content = el.querySelector('.content')
-    copy = buildTextElement({ text: content.textContent, x, y, fontSize: el.style.fontSize, style: getElementStyle(el) })
-  } else {
-    const img = el.querySelector('img.content')
-    copy = buildImageElement({ src: img.dataset.lastGood || img.src, x, y, width: el.style.width })
+    return buildTextElement({ text: content.textContent, x, y, fontSize: el.style.fontSize, style: getElementStyle(el) })
   }
-  saveSnapshot()
-  setInteractive(true)
-  showToolbarFor(copy)
+  const img = el.querySelector('img.content')
+  return buildImageElement({ src: img.dataset.lastGood || img.src, x, y, width: el.style.width })
 }
 
 function appendWithHandle(el) {
@@ -274,7 +273,7 @@ document.addEventListener('mousemove', (event) => {
     const moved =
       Math.abs(event.clientX - pendingItemDrag.x) + Math.abs(event.clientY - pendingItemDrag.y)
     if (moved > 4) {
-      const el = detachItemToElement(pendingItemDrag.item)
+      const el = detachItemToElement(pendingItemDrag.item, pendingItemDrag.copy)
       pendingItemDrag = null
       startDrag(el, event)
       showToolbarFor(el)
@@ -304,14 +303,15 @@ document.addEventListener('mousedown', (event) => {
   if (event.target.closest('.board-fold')) return
   const item = event.target.closest('.item')
   if (item) {
-    pendingItemDrag = { item, x: event.clientX, y: event.clientY }
+    pendingItemDrag = { item, x: event.clientX, y: event.clientY, copy: event.altKey }
     showToolbarFor(item)
     return
   }
   const el = event.target.closest('.el')
   if (!el) return
-  startDrag(el, event)
-  showToolbarFor(el)
+  const target = event.altKey ? cloneElement(el) : el
+  startDrag(target, event)
+  showToolbarFor(target)
 })
 
 document.addEventListener('mouseup', () => {
@@ -334,12 +334,17 @@ document.addEventListener('dblclick', (event) => {
   if (target) startTextEdit(target)
 })
 
+// 右鍵 = 刪除(板子整組刪、板內單條刪)。刪錯了 Ctrl+Z 救回來。
 document.addEventListener('contextmenu', (event) => {
   if (event.target.closest('#toolbar')) return
-  const el = event.target.closest('.el')
-  if (!el || el.classList.contains('board')) return
+  if (editingContent) return
+  const target = event.target.closest('.item') || event.target.closest('.el')
+  if (!target) return
   event.preventDefault()
-  duplicateElement(el)
+  hideToolbar()
+  target.remove()
+  setInteractive(false)
+  saveSnapshot()
 })
 
 // 滾輪縮放:懸停就能調,不用先選中。板內項目調單條,標題列調整板。
