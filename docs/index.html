@@ -16,8 +16,25 @@
     />
     <meta property="og:image" content="og.png" />
     <meta property="og:type" content="website" />
+    <script>
+      document.documentElement.dataset.theme = localStorage.getItem('lanpai-theme') || 'light'
+    </script>
     <style>
       :root {
+        --blue: #2e6fd8;
+        --blue-deep: #3f86f0;
+        --bg: #f4f6fa;
+        --panel: #ffffff;
+        --text: #1d2634;
+        --muted: #5d6b80;
+        --line: rgba(15, 30, 60, 0.12);
+        --story: #3a4658;
+        --kbd-bg: #eef2f9;
+        --hint: #8a94a6;
+        --glow: rgba(63, 134, 240, 0.1);
+        --mock-shadow: rgba(25, 45, 90, 0.22);
+      }
+      html[data-theme='dark'] {
         --blue: #78b4ff;
         --blue-deep: #3f86f0;
         --bg: #0c0e12;
@@ -25,6 +42,11 @@
         --text: #e8edf5;
         --muted: #8c97a8;
         --line: rgba(255, 255, 255, 0.08);
+        --story: #cdd6e3;
+        --kbd-bg: #0a0d13;
+        --hint: #5f6a7c;
+        --glow: rgba(120, 180, 255, 0.14);
+        --mock-shadow: rgba(0, 0, 0, 0.55);
       }
       * {
         box-sizing: border-box;
@@ -35,7 +57,7 @@
       body {
         margin: 0;
         background:
-          radial-gradient(1200px 600px at 50% -10%, rgba(120, 180, 255, 0.14), transparent 60%),
+          radial-gradient(1200px 600px at 50% -10%, var(--glow), transparent 60%),
           var(--bg);
         color: var(--text);
         font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
@@ -88,7 +110,7 @@
       }
       .tagline2 {
         font-size: 0.95rem;
-        color: #5f6a7c;
+        color: var(--hint);
         margin: 0 auto 34px;
       }
       .cta {
@@ -141,7 +163,7 @@
       }
       .story {
         font-size: 1.08rem;
-        color: #cdd6e3;
+        color: var(--story);
       }
       .story strong {
         color: var(--blue);
@@ -178,7 +200,7 @@
         vertical-align: top;
       }
       kbd {
-        background: #0a0d13;
+        background: var(--kbd-bg);
         border: 1px solid var(--line);
         border-bottom-width: 2px;
         border-radius: 6px;
@@ -195,7 +217,7 @@
         padding: 18px 20px;
         overflow-x: auto;
         font-size: 0.92rem;
-        color: #cdd6e3;
+        color: var(--story);
       }
       footer {
         text-align: center;
@@ -222,7 +244,7 @@
         background:
           linear-gradient(160deg, #131722 0%, #0e1118 60%, #0b0d12 100%);
         border: 1px solid var(--line);
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+        box-shadow: 0 24px 70px var(--mock-shadow);
         overflow: hidden;
       }
       .mock-win {
@@ -314,8 +336,26 @@
         bottom: 10px;
         transform: translateX(-50%);
         font-size: 0.78rem;
-        color: #5f6a7c;
+        color: #6d7888;
         white-space: nowrap;
+      }
+      .theme-toggle {
+        position: fixed;
+        top: 14px;
+        right: 14px;
+        z-index: 10;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        color: var(--muted);
+        border-radius: 999px;
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        font-family: inherit;
+        cursor: pointer;
+      }
+      .theme-toggle:hover {
+        color: var(--text);
+        border-color: var(--blue);
       }
       .board-demo {
         display: flex;
@@ -384,6 +424,7 @@
     </style>
   </head>
   <body>
+    <button class="theme-toggle" id="theme-toggle" type="button"></button>
     <header class="reveal in">
       <div class="wrap">
         <img class="logo" src="icon.png" alt="懶拍 Overlay" />
@@ -617,6 +658,18 @@ npm start</pre>
         { threshold: 0.12 }
       )
       document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+
+      const toggle = document.getElementById('theme-toggle')
+      const syncToggleLabel = () => {
+        toggle.textContent = document.documentElement.dataset.theme === 'dark' ? '淺色' : '深色'
+      }
+      toggle.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+        document.documentElement.dataset.theme = next
+        localStorage.setItem('lanpai-theme', next)
+        syncToggleLabel()
+      })
+      syncToggleLabel()
     </script>
   </body>
 </html>
