@@ -122,6 +122,30 @@
   document.dispatchEvent(new MouseEvent('mouseup', {}))
   assert('alt-drag duplicates note', wallTexts().filter((t) => t === 'rc-del').length === 2)
 
+  // 刪 X 後移 Y:undo 第一下退位置、第二下退刪除
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  saveSnapshot()
+  addTextElement('mv-X')
+  addTextElement('mv-Y')
+  const findNote = (text) =>
+    [...document.querySelectorAll('body > .el.text')].find((el) => el.querySelector('.content').textContent === text)
+  const yBefore = findNote('mv-Y').style.left
+  findNote('mv-X').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))
+  const yEl = findNote('mv-Y')
+  const yr = yEl.getBoundingClientRect()
+  yEl.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: yr.left + 4, clientY: yr.top + 4 }))
+  document.dispatchEvent(new MouseEvent('mousemove', { clientX: yr.left + 200, clientY: yr.top + 120 }))
+  document.dispatchEvent(new MouseEvent('mouseup', {}))
+  assert('setup: X deleted and Y moved', !findNote('mv-X') && findNote('mv-Y').style.left !== yBefore)
+  undo()
+  assert('undo #1 restores position only', findNote('mv-Y').style.left === yBefore && !findNote('mv-X'))
+  undo()
+  assert('undo #2 restores deletion', Boolean(findNote('mv-X')))
+  redo()
+  assert('redo re-deletes X', !findNote('mv-X'))
+  redo()
+  assert('redo re-moves Y', findNote('mv-Y').style.left !== yBefore)
+
   // 歷史面板
   showHistoryPanel()
   assert('history panel lists versions', document.querySelectorAll('#history-panel .hp-row').length > 0)

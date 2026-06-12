@@ -34,13 +34,19 @@ function contentSignature(json) {
   return JSON.stringify(parseJson(json, []).map(sigOf))
 }
 
+// 每個「內容時代」最多兩格:內容里程碑 + 最新位置。
+// 內容變更後第一次移動新開一格(undo 才能先退位置、再退內容),之後連續移動只更新那一格。
 function pushHistory(json) {
   if (histSuspended) return
   const hist = loadHistory()
   const last = hist[hist.length - 1]
   if (last && last.json === json) return
   histCursor = -1
-  if (last && contentSignature(last.json) === contentSignature(json)) {
+  const sig = contentSignature(json)
+  const prev = hist[hist.length - 2]
+  const lastIsSameEra = last && contentSignature(last.json) === sig
+  const lastIsPositionEntry = lastIsSameEra && prev && contentSignature(prev.json) === sig
+  if (lastIsPositionEntry) {
     storeHistory([...hist.slice(0, -1), { t: Date.now(), json }])
     return
   }
