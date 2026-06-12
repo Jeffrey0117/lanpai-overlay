@@ -6,7 +6,7 @@
     <title>懶拍 Overlay — 把文字和圖片直接釘在螢幕上</title>
     <meta
       name="description"
-      content="去背的螢幕浮層。打字、貼圖、釘在鏡頭旁邊。沒有視窗,沒有背景,沒有廢話。"
+      content="去背的螢幕浮層。打字、貼圖、開板分組。沒有視窗,沒有帳號,沒有訂閱。"
     />
     <link rel="icon" href="icon.png" />
     <meta property="og:title" content="懶拍 Overlay" />
@@ -49,23 +49,47 @@
       }
       header {
         text-align: center;
-        padding: 96px 24px 64px;
+        padding: 80px 24px 56px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(120, 180, 255, 0.1);
+        border: 1px solid rgba(120, 180, 255, 0.25);
+        border-radius: 999px;
+        padding: 5px 16px 5px 5px;
+        margin-bottom: 22px;
+        font-size: 0.85rem;
+        color: var(--blue);
+      }
+      .badge b {
+        background: var(--blue-deep);
+        color: #fff;
+        border-radius: 999px;
+        padding: 3px 12px;
+        font-weight: 600;
       }
       .logo {
-        width: 88px;
-        height: 88px;
+        width: 84px;
+        height: 84px;
         filter: drop-shadow(0 8px 28px rgba(120, 180, 255, 0.45));
       }
       h1 {
         font-size: clamp(2.2rem, 6vw, 3.4rem);
-        margin: 22px 0 8px;
+        margin: 18px 0 8px;
         letter-spacing: -0.5px;
       }
       .tagline {
-        font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+        font-size: clamp(1.05rem, 2.5vw, 1.3rem);
         color: var(--muted);
-        max-width: 540px;
-        margin: 0 auto 36px;
+        max-width: 560px;
+        margin: 0 auto 10px;
+      }
+      .tagline2 {
+        font-size: 0.95rem;
+        color: #5f6a7c;
+        margin: 0 auto 34px;
       }
       .cta {
         display: flex;
@@ -104,8 +128,11 @@
         font-size: 0.85rem;
         color: var(--muted);
       }
+      .sub a {
+        color: var(--muted);
+      }
       section {
-        padding: 40px 0;
+        padding: 44px 0;
         border-top: 1px solid var(--line);
       }
       h2 {
@@ -113,7 +140,7 @@
         margin: 0 0 22px;
       }
       .story {
-        font-size: 1.1rem;
+        font-size: 1.08rem;
         color: #cdd6e3;
       }
       .story strong {
@@ -181,16 +208,75 @@
         color: var(--blue);
         text-decoration: none;
       }
-      .board-demo {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        margin-bottom: 22px;
+
+      /* 螢幕模擬:純 CSS 示意,沒有截圖也誠實 */
+      .mock {
+        max-width: 880px;
+        margin: 56px auto 0;
+        padding: 0 24px;
+      }
+      .mock-desktop {
+        position: relative;
+        height: 360px;
+        border-radius: 16px;
+        background:
+          linear-gradient(160deg, #131722 0%, #0e1118 60%, #0b0d12 100%);
+        border: 1px solid var(--line);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+        overflow: hidden;
+      }
+      .mock-win {
+        position: absolute;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .mock-win::before {
+        content: '';
+        display: block;
+        height: 26px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px 10px 0 0;
+      }
+      .mw1 {
+        left: 6%;
+        top: 14%;
+        width: 52%;
+        height: 70%;
+      }
+      .mw2 {
+        right: 4%;
+        bottom: 8%;
+        width: 34%;
+        height: 46%;
+      }
+      .mock-sub {
+        position: absolute;
+        left: 10%;
+        top: 30%;
+        font-size: clamp(1.1rem, 3vw, 1.7rem);
+        font-weight: 900;
+        color: #fff;
+        text-shadow:
+          0 0 6px rgba(0, 0, 0, 0.9),
+          0 2px 4px rgba(0, 0, 0, 0.9);
+        transform: rotate(-1deg);
+      }
+      .mock-note {
+        position: absolute;
+        left: 14%;
+        bottom: 18%;
+        font-weight: 700;
+        color: #ffd400;
+        background: rgba(17, 17, 17, 0.82);
+        padding: 0.2em 0.5em;
+        border-radius: 0.2em;
+        transform: rotate(1.5deg);
       }
       .bd-board {
-        width: 230px;
-        background: rgba(15, 15, 15, 0.7);
+        width: 220px;
+        background: rgba(15, 15, 15, 0.78);
         border: 1px solid var(--line);
         border-radius: 10px;
         overflow: hidden;
@@ -200,14 +286,11 @@
         background: #ffd400;
         color: #111;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         padding: 6px 12px;
         display: flex;
         align-items: center;
         gap: 6px;
-      }
-      .bd-collapsed .bd-title {
-        color: #fff;
       }
       .bd-fold {
         opacity: 0.75;
@@ -215,57 +298,187 @@
       }
       .bd-item {
         padding: 7px 14px;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         color: #e8edf5;
         border-top: 1px solid rgba(255, 255, 255, 0.05);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      }
+      .mock .bd-board {
+        position: absolute;
+        right: 7%;
+        top: 12%;
+        transform: rotate(1deg);
+      }
+      .mock-hint {
+        position: absolute;
+        left: 50%;
+        bottom: 10px;
+        transform: translateX(-50%);
+        font-size: 0.78rem;
+        color: #5f6a7c;
+        white-space: nowrap;
+      }
+      .board-demo {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+      }
+      .bd-collapsed .bd-title {
+        color: #fff;
+      }
+
+      /* 三步驟 */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+        text-align: center;
+      }
+      .step {
+        position: relative;
+        padding: 10px;
+      }
+      .step .num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: rgba(120, 180, 255, 0.12);
+        border: 1px solid rgba(120, 180, 255, 0.3);
+        color: var(--blue);
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .step h3 {
+        margin: 0 0 6px;
+        font-size: 1.05rem;
+      }
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      /* 進場動畫:低調一點 */
+      .reveal {
+        opacity: 0;
+        transform: translateY(22px);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+      .reveal.in {
+        opacity: 1;
+        transform: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
       }
     </style>
   </head>
   <body>
-    <header>
+    <header class="reveal in">
       <div class="wrap">
         <img class="logo" src="icon.png" alt="懶拍 Overlay" />
-        <h1>懶拍 Overlay</h1>
-        <p class="tagline">把文字和圖片直接釘在螢幕上。<br />沒有視窗,沒有背景,沒有廢話。</p>
+        <div><span class="badge"><b>懶拍 Overlay</b>桌面螢幕便籤浮層</span></div>
+        <h1>把文字和圖片直接釘在螢幕上</h1>
+        <p class="tagline">沒有視窗,沒有背景,沒有廢話。</p>
+        <p class="tagline2">免費 · 開源 MIT · 不用帳號 · 不連網 · Windows x64</p>
         <div class="cta">
           <a
             class="btn btn-primary"
             href="https://github.com/Jeffrey0117/lanpai-overlay/releases/latest/download/Lanpai-Overlay-0.2.0-Setup.exe"
-            >下載安裝版 (Windows)</a
+            >下載安裝版</a
           >
           <a
             class="btn btn-ghost"
             href="https://github.com/Jeffrey0117/lanpai-overlay/releases/latest/download/Lanpai-Overlay-0.2.0-portable.exe"
             >免安裝版</a
           >
+          <a class="btn btn-ghost" href="https://github.com/Jeffrey0117/lanpai-overlay">GitHub</a>
         </div>
-        <p class="sub">
-          Windows x64 · 點兩下就開 ·
-          <a
-            href="https://github.com/Jeffrey0117/lanpai-overlay"
-            style="color: var(--muted)"
-            >原始碼在 GitHub</a
-          >
-        </p>
+        <p class="sub">點兩下就開,不用裝 Node.js</p>
+      </div>
+      <div class="mock">
+        <div class="mock-desktop">
+          <div class="mock-win mw1"></div>
+          <div class="mock-win mw2"></div>
+          <div class="mock-sub">台詞浮在這,完全去背</div>
+          <div class="mock-note">買牛奶</div>
+          <div class="bd-board">
+            <div class="bd-title"><span class="bd-fold">▾</span>今天要做</div>
+            <div class="bd-item">回信給老王</div>
+            <div class="bd-item">改 README</div>
+            <div class="bd-item">剪 REEL</div>
+          </div>
+          <div class="mock-hint">▲ 純 CSS 示意圖。實際上它就長這樣,因為它沒有介面</div>
+        </div>
       </div>
     </header>
 
     <div class="wrap">
-      <section>
+      <section class="reveal">
+        <h2>三步就上手</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <h3>按 <kbd>Ctrl+Shift+Space</kbd></h3>
+            <p>螢幕中央冒出一個輸入框</p>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <h3>打字、貼網址、或 #開板</h3>
+            <p>文字上牆、圖片上牆、便籤板上牆</p>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <h3>拖到順眼的位置</h3>
+            <p>滾輪縮放、點一下調樣式,然後繼續工作</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>為什麼是懶拍</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>真的沒有視窗</h3>
+            <p>整層滑鼠穿透、不佔工作列。滑鼠不在便籤上時,它完全不存在,點擊打字都不會被擋。</p>
+          </div>
+          <div class="card">
+            <h3>截圖兩秒上牆</h3>
+            <p><kbd>Win+Shift+S</kbd> 截圖 → <kbd>Ctrl+Shift+V</kbd> 貼上。參考圖、分鏡、聊天記錄,釘在眼前。</p>
+          </div>
+          <div class="card">
+            <h3>會記得,有後悔藥</h3>
+            <p>關掉再開都還在;自動留最近 30 個版本,<kbd>Ctrl+Z</kbd> 回退,誤刪誤清都救得回來。</p>
+          </div>
+          <div class="card">
+            <h3>免費,而且就這樣</h3>
+            <p>MIT 開源。沒有帳號、沒有訂閱、沒有雲端,你的便籤只存在你的電腦。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal">
         <h2>想像一下</h2>
         <p class="story">
           你在錄短影片。台詞記不住,提詞 app 又是一個大視窗擋在那邊。<br /><br />
           你按 <strong>Ctrl+Shift+Space</strong>,打兩行台詞,按 Enter。台詞就浮在鏡頭旁邊——完全去背,只有字。
-          拖到順眼的位置,拉大,加個黑底。錄完按 Del,字消失,像沒存在過。<br /><br />
-          中途要看分鏡?<strong>Win+Shift+S</strong> 截個圖、<strong>Ctrl+Shift+V</strong>,圖直接上牆。<br /><br />
-          整個過程,螢幕上沒有出現過任何一個「視窗」。<br /><br />
+          拖到順眼的位置,拉大,加個黑底。錄完右鍵,字消失。<br /><br />
           然後你會發現自己開始拿它記待辦、堆靈感——打 <strong>#今天要做</strong> 開一塊板,
           便籤拖進去自動排成清單。字幕工具用著用著,就變成你的筆記牆。
         </p>
       </section>
 
-      <section>
+      <section class="reveal">
         <h2>便籤板:把筆記分組</h2>
         <div class="board-demo">
           <div class="bd-board">
@@ -285,12 +498,12 @@
         </p>
       </section>
 
-      <section>
-        <h2>兩顆快捷鍵就會了</h2>
+      <section class="reveal">
+        <h2>快捷鍵</h2>
         <table>
           <tr>
             <td><kbd>Ctrl+Shift+Space</kbd></td>
-            <td>冒出輸入框:打字就是文字,貼圖片網址就是圖片</td>
+            <td>冒出輸入框:打字是文字,貼網址是圖片,#開頭是便籤板</td>
           </tr>
           <tr>
             <td><kbd>Ctrl+Shift+V</kbd></td>
@@ -298,7 +511,7 @@
           </tr>
           <tr>
             <td><kbd>Ctrl+Shift+X</kbd></td>
-            <td>一鍵清空全部</td>
+            <td>一鍵清空全部(清錯了 Ctrl+Z 救回來)</td>
           </tr>
           <tr>
             <td><kbd>Ctrl+Shift+↑</kbd></td>
@@ -306,13 +519,12 @@
           </tr>
           <tr>
             <td><kbd>Ctrl+Z</kbd></td>
-            <td>復原:刪錯、清錯、移錯都救得回來(<kbd>Ctrl+Shift+Z</kbd> 取消復原)</td>
+            <td>復原(<kbd>Ctrl+Shift+Z</kbd> 取消復原);更舊的版本在托盤選單裡挑</td>
           </tr>
         </table>
-        <p class="sub">最爽的用法:<kbd>Win+Shift+S</kbd> 截圖 → <kbd>Ctrl+Shift+V</kbd> 上牆,兩秒搞定。</p>
       </section>
 
-      <section>
+      <section class="reveal">
         <h2>東西上螢幕之後</h2>
         <div class="grid">
           <div class="card">
@@ -332,27 +544,58 @@
             <p>黑字配白影、白字配黑影,壓在花背景上永遠看得清楚。</p>
           </div>
           <div class="card">
-            <h3>滑鼠穿透</h3>
-            <p>滑鼠不在元素上時整層完全不存在,點擊打字都不會被擋到。</p>
-          </div>
-          <div class="card">
             <h3>原地換圖</h3>
             <p>點圖片貼新網址按 Enter,位置大小都不變。</p>
           </div>
           <div class="card">
-            <h3>會記得,還有後悔藥</h3>
-            <p>關掉再開,牆上的東西都還在;自動留最近 30 個版本,隨時跳回任何一刻。</p>
+            <h3>雙擊改字</h3>
+            <p>雙擊文字原地重打;板子標題也一樣,雙擊改名。</p>
           </div>
         </div>
       </section>
 
-      <section>
+      <section class="reveal">
+        <h2>適合誰</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>錄影片的人</h3>
+            <p>台詞釘在鏡頭旁邊當提詞,分鏡截圖貼旁邊對照,錄完右鍵清場。</p>
+          </div>
+          <div class="card">
+            <h3>把螢幕當筆記牆的人</h3>
+            <p>待辦開一塊板、靈感隨手釘,關掉再開都還在,不用多開一個筆記 app。</p>
+          </div>
+          <div class="card">
+            <h3>直播、教學、簡報的人</h3>
+            <p>重點字卡常駐畫面最上層,觀眾看得到,你的滑鼠完全不受影響。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal">
         <h2>用原始碼跑</h2>
         <pre>git clone https://github.com/Jeffrey0117/lanpai-overlay.git
 cd lanpai-overlay
 npm install
 npm start</pre>
         <p class="sub">開起來之後螢幕上什麼都不會出現——這是正常的。看右下角工作列,藍色小圓點就在那待命。</p>
+      </section>
+
+      <section class="reveal" style="text-align: center; border-top: 1px solid var(--line)">
+        <h2>就這樣,沒有更多了</h2>
+        <p class="sub" style="margin-bottom: 26px">不用註冊、不用 API Key、不用學。下載,按 Ctrl+Shift+Space,開始。</p>
+        <div class="cta">
+          <a
+            class="btn btn-primary"
+            href="https://github.com/Jeffrey0117/lanpai-overlay/releases/latest/download/Lanpai-Overlay-0.2.0-Setup.exe"
+            >下載安裝版</a
+          >
+          <a
+            class="btn btn-ghost"
+            href="https://github.com/Jeffrey0117/lanpai-overlay/releases/latest/download/Lanpai-Overlay-0.2.0-portable.exe"
+            >免安裝版</a
+          >
+        </div>
       </section>
     </div>
 
@@ -361,5 +604,19 @@ npm start</pre>
       <a href="https://github.com/Jeffrey0117/lanpai-overlay">GitHub</a> ·
       made by Jeffrey0117
     </footer>
+
+    <script>
+      const io = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in')
+              io.unobserve(entry.target)
+            }
+          }),
+        { threshold: 0.12 }
+      )
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+    </script>
   </body>
 </html>
