@@ -181,6 +181,45 @@
         color: var(--blue);
         text-decoration: none;
       }
+      .board-demo {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+      }
+      .bd-board {
+        width: 230px;
+        background: rgba(15, 15, 15, 0.7);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      }
+      .bd-title {
+        background: #ffd400;
+        color: #111;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .bd-collapsed .bd-title {
+        color: #fff;
+      }
+      .bd-fold {
+        opacity: 0.75;
+        font-size: 0.8rem;
+      }
+      .bd-item {
+        padding: 7px 14px;
+        font-size: 0.95rem;
+        color: #e8edf5;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      }
     </style>
   </head>
   <body>
@@ -220,7 +259,29 @@
           你按 <strong>Ctrl+Shift+Space</strong>,打兩行台詞,按 Enter。台詞就浮在鏡頭旁邊——完全去背,只有字。
           拖到順眼的位置,拉大,加個黑底。錄完按 Del,字消失,像沒存在過。<br /><br />
           中途要看分鏡?<strong>Win+Shift+S</strong> 截個圖、<strong>Ctrl+Shift+V</strong>,圖直接上牆。<br /><br />
-          整個過程,螢幕上沒有出現過任何一個「視窗」。
+          整個過程,螢幕上沒有出現過任何一個「視窗」。<br /><br />
+          然後你會發現自己開始拿它記待辦、堆靈感——打 <strong>#今天要做</strong> 開一塊板,
+          便籤拖進去自動排成清單。字幕工具用著用著,就變成你的筆記牆。
+        </p>
+      </section>
+
+      <section>
+        <h2>便籤板:把筆記分組</h2>
+        <div class="board-demo">
+          <div class="bd-board">
+            <div class="bd-title"><span class="bd-fold">▾</span>今天要做</div>
+            <div class="bd-item">買牛奶</div>
+            <div class="bd-item">回信給老王</div>
+            <div class="bd-item">改 README</div>
+          </div>
+          <div class="bd-board bd-collapsed">
+            <div class="bd-title" style="background: #4d9fff"><span class="bd-fold">▸</span>英文單字</div>
+          </div>
+        </div>
+        <p class="story">
+          輸入框打 <strong>#標題</strong> 就生一塊板。散落的便籤拖進去排成清單、拖出來放生;
+          拖標題列整組搬家,點 <strong>▾</strong> 摺成一條,顏色就是你的分類。
+          滾輪在標題列上滾,整板一起縮放。
         </p>
       </section>
 
@@ -243,6 +304,10 @@
             <td><kbd>Ctrl+Shift+↑</kbd></td>
             <td>置頂開關:釘在最前面 ↔ 放開讓它被蓋住</td>
           </tr>
+          <tr>
+            <td><kbd>Ctrl+Z</kbd></td>
+            <td>復原:刪錯、清錯、移錯都救得回來(<kbd>Ctrl+Shift+Z</kbd> 取消復原)</td>
+          </tr>
         </table>
         <p class="sub">最爽的用法:<kbd>Win+Shift+S</kbd> 截圖 → <kbd>Ctrl+Shift+V</kbd> 上牆,兩秒搞定。</p>
       </section>
@@ -251,8 +316,12 @@
         <h2>東西上螢幕之後</h2>
         <div class="grid">
           <div class="card">
-            <h3>拖、拉、縮</h3>
-            <p>按住拖曳移動;拉右下角小方塊變大變小。</p>
+            <h3>拖、拉、滾</h3>
+            <p>按住拖曳移動;滾輪懸停在上面直接縮放,或拉右下角小方塊。</p>
+          </div>
+          <div class="card">
+            <h3>右鍵刪、Alt 拖複製</h3>
+            <p>右鍵一下就刪(手滑 Ctrl+Z);按住 Alt 拖出一個分身,整塊板也能複製。</p>
           </div>
           <div class="card">
             <h3>樣式面板</h3>
@@ -271,8 +340,8 @@
             <p>點圖片貼新網址按 Enter,位置大小都不變。</p>
           </div>
           <div class="card">
-            <h3>關掉就清空,當機救得回</h3>
-            <p>正常關閉就清空、像沒存在過;意外當機或誤關,下次開啟會問你要不要還原。</p>
+            <h3>會記得,還有後悔藥</h3>
+            <p>關掉再開,牆上的東西都還在;自動留最近 30 個版本,隨時跳回任何一刻。</p>
           </div>
         </div>
       </section>
