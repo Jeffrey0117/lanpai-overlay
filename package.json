@@ -1,12 +1,13 @@
 {
   "name": "lanpai-overlay",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Transparent on-screen overlay for text and images",
   "private": true,
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "smoke": "electron smoke-main.js",
+    "release": "electron-builder --win --publish never",
     "icon": "node scripts/gen-icon.js",
     "dist": "electron-builder --win"
   },
@@ -49,7 +50,8 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "懶拍 Overlay"
+      "shortcutName": "懶拍 Overlay",
+      "artifactName": "Lanpai-Overlay-${version}-Setup.exe"
     },
     "portable": {
       "artifactName": "Lanpai-Overlay-${version}-portable.exe"
