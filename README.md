@@ -51,7 +51,7 @@ npm start
 | `Ctrl+Shift+Space` | 冒出輸入框:打字就是文字,貼圖片網址就是圖片 |
 | `Ctrl+Shift+V` | 把剪貼簿裡的圖直接釘上螢幕 |
 | `Ctrl+Shift+X` | 一鍵清空全部 |
-| `Ctrl+Shift+↑` | 置頂開關:釘在最前面 ↔ 放開讓它被蓋住 |
+| `Ctrl+Shift+↑` / `Ctrl+Shift+↓` | 叫到最前面 / 退到背景(被其他視窗蓋住) |
 | `Ctrl+Z` / `Ctrl+Shift+Z` | 復原 / 取消復原(滑鼠要在牆上的東西附近) |
 
 最爽的用法:`Win+Shift+S` 截圖 → `Ctrl+Shift+V` 上牆,兩秒搞定。

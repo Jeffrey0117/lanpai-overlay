@@ -12,6 +12,7 @@ const {
 } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const { spawn } = require('child_process')
 
 let win = null
 let tray = null
@@ -71,12 +72,36 @@ function clearAll() {
   if (win) win.webContents.send('clear-all')
 }
 
-// 置頂開關:釘在最前面 ↔ 放開讓它被蓋住。要可靠跳到最前面,那一下就得變成置頂
-function toggleTop() {
+// Electron 沒有「壓到最底」的 API:setAlwaysOnTop(false) 只拿掉置頂旗標,視窗還是停在原本的 z 位置
+// (所以從最前面放開時不會自己沉下去)。用 Win32 SetWindowPos 把它真的丟到 z-order 最底。
+function pushToBack() {
+  if (process.platform !== 'win32' || !win) return
+  const buf = win.getNativeWindowHandle()
+  const hwnd = buf.length === 8 ? buf.readBigInt64LE(0).toString() : buf.readInt32LE(0).toString()
+  const sig =
+    '[DllImport("user32.dll")]public static extern bool SetWindowPos(IntPtr h,IntPtr a,int x,int y,int cx,int cy,uint f);'
+  // -2 = HWND_NOTOPMOST、1 = HWND_BOTTOM、0x13 = NOMOVE|NOSIZE|NOACTIVATE
+  const command = `Add-Type -MemberDefinition '${sig}' -Name U -Namespace W;[W.U]::SetWindowPos([IntPtr]${hwnd},[IntPtr]-2,0,0,0,0,0x13);[W.U]::SetWindowPos([IntPtr]${hwnd},[IntPtr]1,0,0,0,0,0x13)`
+  try {
+    spawn('powershell', ['-NoProfile', '-WindowStyle', 'Hidden', '-Command', command], { windowsHide: true })
+  } catch (error) {
+    // 壓背景失敗就維持原狀,不影響其他功能
+  }
+}
+
+// 兩顆明確方向鍵,不用切換:↑ 叫到最前面、↓ 退到背景
+function bringToFront() {
   if (!win) return
-  onTop = !onTop
-  win.setAlwaysOnTop(onTop, 'screen-saver')
-  if (onTop) win.moveTop()
+  onTop = true
+  win.setAlwaysOnTop(true, 'screen-saver')
+  win.moveTop()
+}
+
+function sendToBack() {
+  if (!win) return
+  onTop = false
+  win.setAlwaysOnTop(false)
+  pushToBack()
 }
 
 function pasteClipboardImage() {
@@ -107,7 +132,8 @@ function createTray() {
       { label: '加文字 / 圖片網址\tCtrl+Shift+Space', click: addSmart },
       { label: '貼剪貼簿圖片\tCtrl+Shift+V', click: pasteClipboardImage },
       { label: '加圖片(選檔)', click: addImage },
-      { label: '置頂 / 放開\tCtrl+Shift+↑', click: toggleTop },
+      { label: '叫到最前面\tCtrl+Shift+↑', click: bringToFront },
+      { label: '退到背景\tCtrl+Shift+↓', click: sendToBack },
       { type: 'separator' },
       { label: '復原上一步\tCtrl+Z', click: () => win.webContents.send('undo') },
       {
@@ -146,7 +172,8 @@ app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Shift+Space', addSmart)
   globalShortcut.register('CommandOrControl+Shift+V', pasteClipboardImage)
   globalShortcut.register('CommandOrControl+Shift+X', clearAll)
-  globalShortcut.register('CommandOrControl+Shift+Up', toggleTop)
+  globalShortcut.register('CommandOrControl+Shift+Up', bringToFront)
+  globalShortcut.register('CommandOrControl+Shift+Down', sendToBack)
 })
 
 app.on('will-quit', () => {

@@ -89,7 +89,7 @@ Nothing appears on launch — that's by design. The blue dot in your system tray
 | `Ctrl+Shift+Space` | Smart input (text / image URL) |
 | `Ctrl+Shift+V` | Pin clipboard image |
 | `Ctrl+Shift+X` | Clear everything |
-| `Ctrl+Shift+↑` | Toggle topmost (pin to front ↔ let it be covered) |
+| `Ctrl+Shift+↑` / `Ctrl+Shift+↓` | Bring to front / send to back (let other windows cover it) |
 | `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / redo content changes (last 30 versions kept; older ones via tray → 還原較早版本) |
 | `Del` | Delete selected element |
 | `Esc` | Close input |
