@@ -148,6 +148,13 @@ function createTray() {
       { type: 'separator' },
       { label: '清空全部\tCtrl+Shift+X', click: clearAll },
       { type: 'separator' },
+      {
+        label: '使用說明 / 快捷鍵',
+        click: () => {
+          win.webContents.send('show-help')
+          win.focus()
+        }
+      },
       { label: '結束', click: () => app.quit() }
     ])
   )

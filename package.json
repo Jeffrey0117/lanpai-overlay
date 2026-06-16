@@ -1,6 +1,6 @@
 {
   "name": "lanpai-overlay",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Transparent on-screen overlay for text and images",
   "private": true,
   "main": "main.js",
@@ -27,6 +27,8 @@
       "toolbar.js",
       "board.js",
       "history.js",
+      "groups.js",
+      "onboarding.js",
       "assets/**/*"
     ],
     "win": {

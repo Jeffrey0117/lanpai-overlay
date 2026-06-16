@@ -63,7 +63,13 @@ Save styles as templates (T1, T2…) that survive restarts. Content survives res
 An image's panel is a URL field: paste, Enter, swapped — position and size preserved. Bad URL? It rolls back.
 
 ### Focus: show only these
-Select something and the toolbar gains a **✦ Focus** button: click it and only that element stays on screen, the rest hide. To focus several at once, `Shift`+click to multi-select first (selected ones get a blue outline), then focus — mix titles, images, boards freely. Press `Ctrl+Shift+↑` (or `Esc`) to bring everything back.
+Select something and the toolbar gains a **✦ Focus** button: click it and only that element stays on screen, the rest hide. To focus several at once, `Shift`+click to multi-select first (selected ones get a blue outline), then focus — mix titles, images, boards freely. Press `Ctrl+Shift+↑` (or `Esc`) to bring everything back. Empty space stays click-through while focused, so you can pin a few notes and keep using the app underneath.
+
+### Selection slots: save a set, recall it instantly
+Always focusing the same group? After `Shift`-multi-selecting, `Shift`+click a number `1`–`7` in the toolbar to save the set; later just **click that number** to recall and focus it. The input panel (`Ctrl+Shift+Space`) has the same row for recalling while idle. Slots persist across restarts, and deleted members are skipped automatically. Right-click a number to clear it.
+
+### First time? A welcome card
+On first launch a welcome card lists the key shortcuts; dismiss it and it won't return. To see it again: tray dot → "使用說明 / 快捷鍵".
 
 ### Boards: group notes together
 Type `#Today` in the input box to spawn a titled board. Drag loose notes onto it and they snap into a vertical list; drag them out to set them free again. Drag the title bar to move the whole group, double-click it to rename, recolor it from its panel, and `Del` removes the board with everything in it. Scroll over one item to resize just that line, or over the title bar to scale the whole board. Click the ▾ on the title bar to collapse the board down to a single line.

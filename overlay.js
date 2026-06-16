@@ -21,13 +21,14 @@ function serializeElements() {
   return [...document.querySelectorAll('.el')].map((el) => {
     const x = parseFloat(el.style.left) || 0
     const y = parseFloat(el.style.top) || 0
+    const id = el.dataset.elid
     if (el.classList.contains('board')) return serializeBoard(el)
     if (el.classList.contains('text')) {
       const content = el.querySelector('.content')
-      return { kind: 'text', x, y, fontSize: el.style.fontSize, text: content.textContent, style: getElementStyle(el) }
+      return { kind: 'text', id, x, y, fontSize: el.style.fontSize, text: content.textContent, style: getElementStyle(el) }
     }
     const img = el.querySelector('img.content')
-    return { kind: 'image', x, y, width: el.style.width, src: img.dataset.lastGood || img.src }
+    return { kind: 'image', id, x, y, width: el.style.width, src: img.dataset.lastGood || img.src }
   })
 }
 
@@ -50,7 +51,7 @@ function setInteractive(on) {
 function shouldBeInteractive(target) {
   // 注意:聚焦中不強制整層可互動,否則空白處會擋住底下的工作視窗。
   // 只有滑鼠真的在某個元素/工具列上才攔截;聚焦中那些被藏的元素是 display:none,本來就收不到滑鼠。
-  if (entryOpen || editingContent || dragState || toolbarVisible() || historyOpen) return true
+  if (entryOpen || editingContent || dragState || toolbarVisible() || historyOpen || helpOpen) return true
   if (!(target instanceof Element)) return false
   return Boolean(target.closest('.el, #toolbar'))
 }
@@ -91,6 +92,17 @@ function exitSpotlight() {
   setInteractive(false)
 }
 
+// 穩定身分證:給選取組用,存檔帶著、還原認得回來。沒帶 id 的(新建/複製/拖出板)就發一個新的。
+let idCounter = 0
+function newId() {
+  idCounter += 1
+  return `e${Date.now().toString(36)}-${idCounter}`
+}
+
+function tagElement(el, id) {
+  el.dataset.elid = id || newId()
+}
+
 function nextPosition() {
   const offset = (cascade % 8) * 28
   cascade += 1
@@ -106,9 +118,10 @@ function placeElement(el, x, y) {
   el.style.top = `${pos.y}px`
 }
 
-function buildTextElement({ text, x, y, fontSize, style }) {
+function buildTextElement({ text, x, y, fontSize, style, id }) {
   const el = document.createElement('div')
   el.className = 'el text'
+  tagElement(el, id)
   placeElement(el, x, y)
   el.style.fontSize = fontSize || '32px'
   const content = document.createElement('span')
@@ -130,9 +143,10 @@ function toFileUrl(filePath) {
   return `file:///${encodeURI(normalized).replace(/#/g, '%23')}`
 }
 
-function buildImageElement({ src, x, y, width }) {
+function buildImageElement({ src, x, y, width, id }) {
   const el = document.createElement('div')
   el.className = 'el image'
+  tagElement(el, id)
   placeElement(el, x, y)
   if (width) el.style.width = width
   const img = document.createElement('img')
@@ -349,8 +363,8 @@ document.addEventListener('mousedown', (event) => {
   }
   const el = event.target.closest('.el')
   if (!el) {
-    // 點工具列(例如聚焦鈕)不算點空白,不能清掉多選 — 否則聚焦鈕會在生效前先被清空
-    if (!event.target.closest('#toolbar')) clearSelection()
+    // 點工具列/輸入框面板(例如聚焦鈕、選取組數字)不算點空白,不能清掉多選 — 否則會在生效前先被清空
+    if (!event.target.closest('#toolbar, #text-entry')) clearSelection()
     return
   }
   if (event.shiftKey) {
@@ -489,5 +503,7 @@ api.onClearAll(() => {
 api.onUndo(undo)
 api.onShowHistory(showHistoryPanel)
 api.onExitSpotlight(exitSpotlight)
+api.onShowHelp(showHelpCard)
 
 initRestore()
+initOnboarding()

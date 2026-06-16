@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('lanpai', {
   onUndo: (callback) => ipcRenderer.on('undo', () => callback()),
   onShowHistory: (callback) => ipcRenderer.on('show-history', () => callback()),
   onExitSpotlight: (callback) => ipcRenderer.on('exit-spotlight', () => callback()),
+  onShowHelp: (callback) => ipcRenderer.on('show-help', () => callback()),
   setIgnoreMouse: (ignore) => ipcRenderer.send('set-ignore-mouse', ignore)
 })

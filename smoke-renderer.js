@@ -2,6 +2,9 @@
   const results = []
   const assert = (name, cond) => results.push({ name, pass: Boolean(cond) })
 
+  // 首次啟動會自動跳歡迎卡,先關掉免得 helpOpen 影響互動斷言
+  closeHelpCard()
+
   // 建板 + 建自由便籤
   const board = buildBoardElement({ title: '測試板', x: 100, y: 100 })
   assert('board created', document.querySelector('.el.board') === board)
@@ -219,6 +222,47 @@
       [...document.querySelectorAll('body > .el.text')].length > 0 &&
       [...document.querySelectorAll('body > .el.text')].every((el) => getComputedStyle(el).display !== 'none')
   )
+
+  // 選取組:存進 1、叫回時重新選中並聚焦、重開(序列化往返)後仍叫得回、刪掉的成員自動跳過
+  localStorage.removeItem(GROUPS_KEY)
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  const g1 = buildTextElement({ text: 'grp1', x: 40, y: 200 })
+  const g2 = buildTextElement({ text: 'grp2', x: 180, y: 200 })
+  const g3 = buildTextElement({ text: 'grp3', x: 320, y: 200 })
+  setSelection([g1, g2, g3])
+  saveGroupSlot('1')
+  assert('group slot saved', slotFilled('1'))
+  assert('group stores 3 ids', (loadGroups()['1'] || []).length === 3)
+  clearSelection()
+  exitSpotlight()
+  assert('recall returns true for a filled slot', recallGroupSlot('1') === true)
+  assert('recall focuses the whole group', document.querySelectorAll('.el.spotlighted').length === 3)
+  exitSpotlight()
+  // 模擬重開:序列化→清空→還原,id 不變,組仍叫得回
+  const grpSnap = JSON.stringify(serializeElements())
+  assert('serialized elements carry ids', parseJson(grpSnap, []).every((it) => typeof it.id === 'string' && it.id.length > 0))
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  restoreSnapshot(parseJson(grpSnap, []))
+  exitSpotlight()
+  assert(
+    'recall survives a serialize round-trip',
+    recallGroupSlot('1') === true && document.querySelectorAll('.el.spotlighted').length === 3
+  )
+  exitSpotlight()
+  // 刪掉組裡一個成員,叫回自動跳過
+  document.querySelector('.el[data-elid="' + loadGroups()['1'][0] + '"]').remove()
+  assert('recall still works with a deleted member', recallGroupSlot('1') === true)
+  assert('recall skips the deleted member', document.querySelectorAll('.el.spotlighted').length === 2)
+  exitSpotlight()
+
+  // 歡迎卡:叫得出來、關掉後設旗標、之後不再自動跳
+  localStorage.removeItem(ONBOARD_KEY)
+  showHelpCard()
+  assert('help card shows on demand', !!document.getElementById('help-card'))
+  closeHelpCard()
+  assert('help card dismisses and sets flag', !document.getElementById('help-card') && localStorage.getItem(ONBOARD_KEY) === '1')
+  initOnboarding()
+  assert('onboarding does not re-show once flagged', !document.getElementById('help-card'))
 
   // 歷史面板
   showHistoryPanel()

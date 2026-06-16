@@ -38,9 +38,10 @@ function buildBoardItem(data) {
   return item
 }
 
-function buildBoardElement({ title, x, y, width, color, titleFontSize, items, collapsed }) {
+function buildBoardElement({ title, x, y, width, color, titleFontSize, items, collapsed, id }) {
   const el = document.createElement('div')
   el.className = 'el board'
+  tagElement(el, id)
   if (collapsed) el.classList.add('collapsed')
   placeElement(el, x, y)
   el.style.width = width || `${BOARD_DEFAULT_WIDTH}px`
@@ -93,6 +94,7 @@ function serializeBoard(board) {
   const titleBar = board.querySelector('.board-title')
   return {
     kind: 'board',
+    id: board.dataset.elid,
     x: parseFloat(board.style.left) || 0,
     y: parseFloat(board.style.top) || 0,
     width: board.style.width,
