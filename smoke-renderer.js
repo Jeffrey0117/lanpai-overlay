@@ -163,6 +163,13 @@
   spotA.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))
   assert('deleting focused note exits spotlight', !document.body.classList.contains('spotlight') && getComputedStyle(spotB).display !== 'none')
 
+  // 回歸:聚焦時空白處要穿透(不擋底下視窗),聚焦的便籤仍可互動
+  const si1 = buildTextElement({ text: 'si1', x: 100, y: 400 })
+  enterSpotlight([si1])
+  assert('spotlight: empty area stays click-through', shouldBeInteractive(document.body) === false)
+  assert('spotlight: focused note still interactive', shouldBeInteractive(si1) === true)
+  exitSpotlight()
+
   // 多選聚焦:一般點選一個 + Shift 點累加,聚焦整組
   document.querySelectorAll('.el').forEach((el) => el.remove())
   const mm1 = buildTextElement({ text: 'mm1', x: 50, y: 60 })

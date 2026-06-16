@@ -48,7 +48,9 @@ function setInteractive(on) {
 }
 
 function shouldBeInteractive(target) {
-  if (entryOpen || editingContent || dragState || toolbarVisible() || historyOpen || spotlightSet) return true
+  // 注意:聚焦中不強制整層可互動,否則空白處會擋住底下的工作視窗。
+  // 只有滑鼠真的在某個元素/工具列上才攔截;聚焦中那些被藏的元素是 display:none,本來就收不到滑鼠。
+  if (entryOpen || editingContent || dragState || toolbarVisible() || historyOpen) return true
   if (!(target instanceof Element)) return false
   return Boolean(target.closest('.el, #toolbar'))
 }
