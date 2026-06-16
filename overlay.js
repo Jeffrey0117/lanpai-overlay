@@ -11,6 +11,8 @@ let pendingItemDrag = null
 let cascade = 0
 let toolbarHideTimer = null
 let wheelSaveTimer = null
+let spotlightSet = null
+let selection = []
 
 // 筆記就該記得:背景一直記快照,每次開啟靜默還原。要從零開始用 Ctrl+Shift+X。
 const SNAP_KEY = 'lanpai-snapshot'
@@ -46,9 +48,45 @@ function setInteractive(on) {
 }
 
 function shouldBeInteractive(target) {
-  if (entryOpen || editingContent || dragState || toolbarVisible() || historyOpen) return true
+  if (entryOpen || editingContent || dragState || toolbarVisible() || historyOpen || spotlightSet) return true
   if (!(target instanceof Element)) return false
   return Boolean(target.closest('.el, #toolbar'))
+}
+
+// 多選:Shift+點累加,被選的有外框。一般點會清掉,只留單一。
+function setSelection(els) {
+  selection = els
+  document.querySelectorAll('.el.selected').forEach((node) => node.classList.remove('selected'))
+  // 外框只在選了 2 個以上時出現:單選維持乾淨,多選才需要看出「選了哪些」
+  if (els.length >= 2) els.forEach((node) => node.classList.add('selected'))
+}
+
+function clearSelection() {
+  if (selection.length) setSelection([])
+}
+
+function toggleSelected(el) {
+  setSelection(selection.includes(el) ? selection.filter((node) => node !== el) : [...selection, el])
+}
+
+// 聚焦:只顯示選中的這幾個,其他暫時藏起來。臨時觀看狀態,不寫進快照。
+function enterSpotlight(els) {
+  const list = Array.isArray(els) ? els : [els]
+  if (!list.length) return
+  spotlightSet = list
+  document.querySelectorAll('.el').forEach((node) => node.classList.toggle('spotlighted', list.includes(node)))
+  clearSelection()
+  document.body.classList.add('spotlight')
+  hideToolbar()
+  setInteractive(true)
+}
+
+function exitSpotlight() {
+  if (!spotlightSet) return
+  spotlightSet = null
+  document.body.classList.remove('spotlight')
+  document.querySelectorAll('.el.spotlighted').forEach((node) => node.classList.remove('spotlighted'))
+  setInteractive(false)
 }
 
 function nextPosition() {
@@ -308,8 +346,18 @@ document.addEventListener('mousedown', (event) => {
     return
   }
   const el = event.target.closest('.el')
-  if (!el) return
+  if (!el) {
+    // 點工具列(例如聚焦鈕)不算點空白,不能清掉多選 — 否則聚焦鈕會在生效前先被清空
+    if (!event.target.closest('#toolbar')) clearSelection()
+    return
+  }
+  if (event.shiftKey) {
+    toggleSelected(el)
+    showToolbarFor(el)
+    return
+  }
   const target = event.altKey ? cloneElement(el) : el
+  setSelection([target])
   startDrag(target, event)
   showToolbarFor(target)
 })
@@ -343,6 +391,7 @@ document.addEventListener('contextmenu', (event) => {
   event.preventDefault()
   hideToolbar()
   target.remove()
+  if (spotlightSet && !document.querySelector('.el.spotlighted')) exitSpotlight()
   setInteractive(false)
   saveSnapshot()
 })
@@ -380,6 +429,11 @@ document.addEventListener('keydown', (event) => {
     return
   }
   const typing = editingContent || entryOpen || event.target instanceof HTMLInputElement
+  if (event.key === 'Escape' && !typing) {
+    if (spotlightSet) exitSpotlight()
+    else clearSelection()
+    return
+  }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !typing) {
     event.preventDefault()
     if (event.shiftKey) redo()
@@ -390,6 +444,7 @@ document.addEventListener('keydown', (event) => {
     const el = toolbarTarget
     hideToolbar()
     el.remove()
+    if (spotlightSet && !document.querySelector('.el.spotlighted')) exitSpotlight()
     setInteractive(false)
     saveSnapshot()
   }
@@ -423,6 +478,7 @@ function initRestore() {
 api.onAddSmart(() => openEntry())
 api.onAddImage(addImageElement)
 api.onClearAll(() => {
+  exitSpotlight()
   hideToolbar()
   document.querySelectorAll('.el').forEach((el) => el.remove())
   setInteractive(false)
@@ -430,5 +486,6 @@ api.onClearAll(() => {
 })
 api.onUndo(undo)
 api.onShowHistory(showHistoryPanel)
+api.onExitSpotlight(exitSpotlight)
 
 initRestore()

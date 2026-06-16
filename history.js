@@ -55,6 +55,10 @@ function pushHistory(json) {
 
 function rebuildFromJson(json) {
   finishTextEdit()
+  // 聚焦/多選是臨時觀看狀態,撐不過內容重建:不先退出的話,body 還掛著聚焦模式
+  // 但新元素都沒被聚焦標記,CSS 會把全部藏掉,看起來像「整個消失」。
+  exitSpotlight()
+  clearSelection()
   hideToolbar()
   document.querySelectorAll('.el').forEach((el) => el.remove())
   histSuspended = true

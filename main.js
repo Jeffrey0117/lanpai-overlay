@@ -90,11 +90,13 @@ function pushToBack() {
 }
 
 // 兩顆明確方向鍵,不用切換:↑ 叫到最前面、↓ 退到背景
+// ↑ 同時通知畫面端退出聚焦(若有):聚焦中按它 = 全部回來且置頂
 function bringToFront() {
   if (!win) return
   onTop = true
   win.setAlwaysOnTop(true, 'screen-saver')
   win.moveTop()
+  win.webContents.send('exit-spotlight')
 }
 
 function sendToBack() {

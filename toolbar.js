@@ -235,6 +235,7 @@ function showToolbarFor(el) {
   templateRow.style.display = isText ? '' : 'none'
   urlRow.style.display = isImage ? '' : 'none'
   boardRow.style.display = isBoard ? '' : 'none'
+  focusRow.style.display = el.classList.contains('item') ? 'none' : ''
   toolbar.style.display = 'flex'
   if (isText) syncToolbarState()
   if (isImage) urlInput.value = ''
@@ -299,6 +300,20 @@ COLORS.forEach((color) => {
 })
 boardRow.appendChild(makeDeleteButton())
 
+// 聚焦:只顯示這一個,其他暫時藏起來。對任何元素都適用,板內單條除外。
+const focusRow = document.createElement('div')
+focusRow.className = 'tb-row'
+const focusBtn = document.createElement('button')
+focusBtn.className = 'tb-btn'
+focusBtn.textContent = '✦ 聚焦'
+focusBtn.title = '只顯示選中的,其他暫時藏起來 (Shift+點可多選;Esc 或點空白結束)'
+focusBtn.addEventListener('click', () => {
+  const set = selection.length ? selection : toolbarTarget ? [toolbarTarget] : []
+  if (set.length) enterSpotlight(set)
+})
+focusRow.appendChild(focusBtn)
+
+toolbar.appendChild(focusRow)
 toolbar.appendChild(swatchRow)
 toolbar.appendChild(controlRow)
 toolbar.appendChild(templateRow)

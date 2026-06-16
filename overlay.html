@@ -122,6 +122,17 @@
         pointer-events: none;
       }
 
+      /* 多選:被選中的有實線藍框(跟 hover 的虛線區別開) */
+      .el.selected {
+        outline: 2px solid rgba(120, 180, 255, 0.95);
+        outline-offset: 1px;
+      }
+
+      /* 聚焦模式:只留被聚焦的那幾個,其他暫時藏起來 */
+      body.spotlight .el:not(.spotlighted) {
+        display: none;
+      }
+
       .handle {
         position: absolute;
         right: -7px;

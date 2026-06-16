@@ -146,6 +146,73 @@
   redo()
   assert('redo re-moves Y', findNote('mv-Y').style.left !== yBefore)
 
+  // 聚焦:只顯示一個,其他藏起來;Esc 還原
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  const spotA = buildTextElement({ text: 'spot-A', x: 100, y: 100 })
+  const spotB = buildTextElement({ text: 'spot-B', x: 300, y: 100 })
+  enterSpotlight(spotA)
+  assert('spotlight shows target', getComputedStyle(spotA).display !== 'none')
+  assert('spotlight hides others', getComputedStyle(spotB).display === 'none')
+  assert('spotlight sets body class', document.body.classList.contains('spotlight'))
+  document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 5, clientY: 5 }))
+  assert('clicking empty no longer exits spotlight', document.body.classList.contains('spotlight'))
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  assert('Esc exits spotlight', getComputedStyle(spotB).display !== 'none' && !document.body.classList.contains('spotlight'))
+  // 刪掉被聚焦的便籤會自動退出聚焦,不會卡在空白畫面
+  enterSpotlight(spotA)
+  spotA.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))
+  assert('deleting focused note exits spotlight', !document.body.classList.contains('spotlight') && getComputedStyle(spotB).display !== 'none')
+
+  // 多選聚焦:一般點選一個 + Shift 點累加,聚焦整組
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  const mm1 = buildTextElement({ text: 'mm1', x: 50, y: 60 })
+  const mm2 = buildTextElement({ text: 'mm2', x: 200, y: 60 })
+  const mm3 = buildTextElement({ text: 'mm3', x: 350, y: 60 })
+  const mm4 = buildTextElement({ text: 'mm4', x: 500, y: 60 })
+  mm1.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 55, clientY: 65 }))
+  document.dispatchEvent(new MouseEvent('mouseup', {}))
+  mm2.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, shiftKey: true, clientX: 205, clientY: 65 }))
+  mm3.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, shiftKey: true, clientX: 355, clientY: 65 }))
+  assert('shift-click builds multi-selection', document.querySelectorAll('.el.selected').length === 3)
+  enterSpotlight(selection)
+  assert(
+    'multi-spotlight shows all selected',
+    getComputedStyle(mm1).display !== 'none' && getComputedStyle(mm2).display !== 'none' && getComputedStyle(mm3).display !== 'none'
+  )
+  assert('multi-spotlight hides the rest', getComputedStyle(mm4).display === 'none')
+  exitSpotlight()
+  assert('exit restores all and clears selection', getComputedStyle(mm4).display !== 'none' && document.querySelectorAll('.el.selected').length === 0)
+
+  // 回歸:點工具列(聚焦鈕)不可清掉多選,聚焦鈕要能聚焦整組
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  const f1 = buildTextElement({ text: 'f1', x: 50, y: 60 })
+  const f2 = buildTextElement({ text: 'f2', x: 200, y: 60 })
+  const f3 = buildTextElement({ text: 'f3', x: 350, y: 60 })
+  f1.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 55, clientY: 65 }))
+  document.dispatchEvent(new MouseEvent('mouseup', {}))
+  f2.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, shiftKey: true, clientX: 205, clientY: 65 }))
+  f3.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, shiftKey: true, clientX: 355, clientY: 65 }))
+  const focusBtn = [...document.querySelectorAll('#toolbar .tb-btn')].find((b) => b.textContent.includes('聚焦'))
+  focusBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }))
+  assert('clicking toolbar keeps selection', selection.length === 3)
+  focusBtn.click()
+  assert('focus button spotlights all 3', document.querySelectorAll('.el.spotlighted').length === 3)
+  exitSpotlight()
+
+  // 回歸:聚焦中按復原不會整個畫面消失(重建前要先退出聚焦)
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  saveSnapshot()
+  addTextElement('undoSpot1')
+  addTextElement('undoSpot2')
+  enterSpotlight([document.querySelector('body > .el.text')])
+  undo()
+  assert(
+    'undo during spotlight does not hide everything',
+    !document.body.classList.contains('spotlight') &&
+      [...document.querySelectorAll('body > .el.text')].length > 0 &&
+      [...document.querySelectorAll('body > .el.text')].every((el) => getComputedStyle(el).display !== 'none')
+  )
+
   // 歷史面板
   showHistoryPanel()
   assert('history panel lists versions', document.querySelectorAll('#history-panel .hp-row').length > 0)

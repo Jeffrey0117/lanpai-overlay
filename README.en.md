@@ -62,6 +62,9 @@ Save styles as templates (T1, T2…) that survive restarts. Content survives res
 ### Swap images in place
 An image's panel is a URL field: paste, Enter, swapped — position and size preserved. Bad URL? It rolls back.
 
+### Focus: show only these
+Select something and the toolbar gains a **✦ Focus** button: click it and only that element stays on screen, the rest hide. To focus several at once, `Shift`+click to multi-select first (selected ones get a blue outline), then focus — mix titles, images, boards freely. Press `Ctrl+Shift+↑` (or `Esc`) to bring everything back.
+
 ### Boards: group notes together
 Type `#Today` in the input box to spawn a titled board. Drag loose notes onto it and they snap into a vertical list; drag them out to set them free again. Drag the title bar to move the whole group, double-click it to rename, recolor it from its panel, and `Del` removes the board with everything in it. Scroll over one item to resize just that line, or over the title bar to scale the whole board. Click the ▾ on the title bar to collapse the board down to a single line.
 
@@ -89,7 +92,7 @@ Nothing appears on launch — that's by design. The blue dot in your system tray
 | `Ctrl+Shift+Space` | Smart input (text / image URL) |
 | `Ctrl+Shift+V` | Pin clipboard image |
 | `Ctrl+Shift+X` | Clear everything |
-| `Ctrl+Shift+↑` / `Ctrl+Shift+↓` | Bring to front / send to back (let other windows cover it) |
+| `Ctrl+Shift+↑` / `Ctrl+Shift+↓` | Bring to front / send to back; in focus mode, ↑ brings everything back |
 | `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / redo content changes (last 30 versions kept; older ones via tray → 還原較早版本) |
 | `Del` | Delete selected element |
 | `Esc` | Close input |
