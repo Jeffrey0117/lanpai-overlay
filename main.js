@@ -8,17 +8,125 @@ const {
   screen,
   nativeImage,
   globalShortcut,
-  clipboard
+  clipboard,
+  shell,
+  safeStorage
 } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const { spawn } = require('child_process')
+const { createLicense } = require('./license')
 
 let win = null
 let tray = null
 let onTop = true
 
 const pasteDir = path.join(app.getPath('temp'), 'lanpai-overlay-paste')
+const API_BASE = process.env.LANPAI_API_URL || 'https://lanpai.pipee.tw'
+const LICENSE_REFRESH_MS = 6 * 3600 * 1000
+let license = null
+
+// 登入憑證用作業系統金鑰加密後才落地;讀不到或解不開就當沒登入
+function createLicenseStore() {
+  const file = path.join(app.getPath('userData'), 'account.bin')
+  return {
+    load() {
+      try {
+        if (!safeStorage.isEncryptionAvailable()) return null
+        return JSON.parse(safeStorage.decryptString(fs.readFileSync(file)))
+      } catch (error) {
+        return null
+      }
+    },
+    save(value) {
+      try {
+        if (!safeStorage.isEncryptionAvailable()) return
+        fs.writeFileSync(file, safeStorage.encryptString(JSON.stringify(value)))
+      } catch (error) {
+        // 存不下來只影響下次要重新登入
+      }
+    }
+  }
+}
+
+function initLicense() {
+  license = createLicense({
+    apiBase: API_BASE,
+    store: createLicenseStore(),
+    openExternal: (url) => shell.openExternal(url),
+    onChange: (plan) => {
+      if (win) win.webContents.send('plan-changed', plan)
+      refreshTrayMenu()
+    }
+  })
+  ipcMain.handle('get-plan', () => license.plan())
+  ipcMain.handle('start-upgrade', async () => {
+    try {
+      const result = await license.upgrade()
+      refreshTrayMenu()
+      return result
+    } catch (error) {
+      return 'error'
+    }
+  })
+  license.refresh().then(refreshTrayMenu)
+  setInterval(() => license.refresh().then(refreshTrayMenu), LICENSE_REFRESH_MS).unref()
+}
+
+async function confirmCancel() {
+  const { until } = license.account()
+  const end = until ? new Date(until).toLocaleDateString() : '這期結束'
+  const { response } = await dialog.showMessageBox({
+    type: 'question',
+    buttons: ['取消訂閱', '繼續使用'],
+    defaultId: 1,
+    cancelId: 1,
+    title: '取消訂閱',
+    message: `確定要取消嗎?已付的期間可以用到 ${end}。`
+  })
+  if (response !== 0) return
+  const ok = await license.cancel().catch(() => false)
+  await dialog.showMessageBox({
+    type: ok ? 'info' : 'error',
+    title: '取消訂閱',
+    message: ok ? '已取消,之後不會再扣款。' : '取消沒有成功,請稍後再試。'
+  })
+  refreshTrayMenu()
+}
+
+function accountMenuItems() {
+  const account = license.account()
+  if (account.plan === 'pro') {
+    const until = account.until ? `到 ${new Date(account.until).toLocaleDateString()}` : ''
+    return [
+      { label: `懶拍 Pro ${until}`.trim(), enabled: false },
+      { label: account.email || '已登入', enabled: false },
+      { label: '取消訂閱', click: confirmCancel },
+      { label: '登出', click: () => license.logout() }
+    ]
+  }
+  const items = [
+    {
+      label: '升級 Pro',
+      click: () => {
+        if (win) {
+          win.webContents.executeJavaScript("showUpgradeCard('elements')")
+          win.focus()
+        }
+      }
+    }
+  ]
+  if (account.signedIn) {
+    items.push({ label: account.email || '已登入', enabled: false })
+    items.push({ label: '登出', click: () => license.logout() })
+  }
+  else items.push({ label: '登入', click: () => license.login().then(refreshTrayMenu) })
+  return items
+}
+
+function refreshTrayMenu() {
+  if (tray) tray.setContextMenu(buildTrayMenu())
+}
 
 function clearPasteDir() {
   try {
@@ -129,8 +237,12 @@ function createTray() {
   const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png'))
   tray = new Tray(icon)
   tray.setToolTip('懶拍 Overlay')
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
+  tray.setContextMenu(buildTrayMenu())
+  tray.on('double-click', addSmart)
+}
+
+function buildTrayMenu() {
+  return Menu.buildFromTemplate([
       { label: '加文字 / 圖片網址\tCtrl+Shift+Space', click: addSmart },
       { label: '貼剪貼簿圖片\tCtrl+Shift+V', click: pasteClipboardImage },
       { label: '加圖片(選檔)', click: addImage },
@@ -148,6 +260,8 @@ function createTray() {
       { type: 'separator' },
       { label: '清空全部\tCtrl+Shift+X', click: clearAll },
       { type: 'separator' },
+      ...accountMenuItems(),
+      { type: 'separator' },
       {
         label: '使用說明 / 快捷鍵',
         click: () => {
@@ -156,9 +270,7 @@ function createTray() {
         }
       },
       { label: '結束', click: () => app.quit() }
-    ])
-  )
-  tray.on('double-click', addSmart)
+  ])
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -176,6 +288,7 @@ app.whenReady().then(() => {
   })
 
   // 不在開機時清暫存:萬一上次是當機,要留著剪貼簿圖片給「還原」用;正常結束才清(will-quit)
+  initLicense()
   createWindow()
   createTray()
   globalShortcut.register('CommandOrControl+Shift+Space', addSmart)

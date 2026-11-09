@@ -290,14 +290,13 @@ entryInput.addEventListener('keydown', (event) => {
     if (value !== '') {
       if (value.startsWith('#')) {
         const title = value.slice(1).trim()
-        if (title !== '') {
+        if (title !== '' && allowBoard()) {
           buildBoardElement({ title })
           saveSnapshot()
         }
-      } else if (/^https?:\/\/\S+$/i.test(value)) {
-        addImageElement(value)
-      } else {
-        addTextElement(value)
+      } else if (allowPin()) {
+        if (/^https?:\/\/\S+$/i.test(value)) addImageElement(value)
+        else addTextElement(value)
       }
     }
     closeEntry()
@@ -372,7 +371,8 @@ document.addEventListener('mousedown', (event) => {
     showToolbarFor(el)
     return
   }
-  const target = event.altKey ? cloneElement(el) : el
+  const wantsClone = event.altKey && (el.classList.contains('board') ? allowBoard() : allowPin())
+  const target = wantsClone ? cloneElement(el) : el
   setSelection([target])
   startDrag(target, event)
   showToolbarFor(target)
@@ -492,7 +492,10 @@ function initRestore() {
 }
 
 api.onAddSmart(() => openEntry())
-api.onAddImage(addImageElement)
+api.onAddImage((source) => {
+  if (allowPin()) addImageElement(source)
+})
+initPlan()
 api.onClearAll(() => {
   exitSpotlight()
   hideToolbar()

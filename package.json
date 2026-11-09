@@ -1,12 +1,13 @@
 {
   "name": "lanpai-overlay",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Transparent on-screen overlay for text and images",
   "private": true,
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "smoke": "electron smoke-main.js",
+    "test": "node --test test/limits.test.js test/license.test.js",
     "release": "electron-builder --win --publish never",
     "icon": "node scripts/gen-icon.js",
     "dist": "electron-builder --win"
@@ -21,6 +22,9 @@
     "icon": "assets/icon-256.png",
     "files": [
       "main.js",
+      "license.js",
+      "limits.js",
+      "wall.js",
       "preload.js",
       "overlay.html",
       "overlay.js",

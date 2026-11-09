@@ -20,6 +20,7 @@ function slotFilled(slot) {
 function saveGroupSlot(slot) {
   if (!selection.length) return
   const groups = loadGroups()
+  if (!allowGroupSave(groups, slot)) return
   groups[slot] = selection.map((el) => el.dataset.elid)
   persistGroups(groups)
 }

@@ -155,6 +155,19 @@ Successor to [lanpai-blueplan](https://github.com/Jeffrey0117/lanpai-blueplan) (
 
 ---
 
+## Free and Pro
+
+| | Free | Pro NT$99 / month |
+|---|---|---|
+| Items pinned at once | 5 | Unlimited |
+| Style templates | 1 | 6 |
+| Selection groups | 1 | 7 |
+| Boards | 1 | Unlimited |
+
+You only see an upgrade prompt when you go past a limit. Sign in, check your plan or cancel from the tray icon menu.
+
+---
+
 ## License
 
 MIT

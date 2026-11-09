@@ -5,6 +5,9 @@
   // 首次啟動會自動跳歡迎卡,先關掉免得 helpOpen 影響互動斷言
   closeHelpCard()
 
+  // 額度牆另外測,其餘功能斷言用 Pro 跑,才不會被額度干擾
+  setPlan('pro')
+
   // 建板 + 建自由便籤
   const board = buildBoardElement({ title: '測試板', x: 100, y: 100 })
   assert('board created', document.querySelector('.el.board') === board)
@@ -269,6 +272,27 @@
   assert('history panel lists versions', document.querySelectorAll('#history-panel .hp-row').length > 0)
   closeHistoryPanel()
   assert('history panel closes', !document.getElementById('history-panel'))
+
+  // 額度牆:免費版超過額度跳升級卡,不增加元素;Pro 不擋
+  document.querySelectorAll('.el').forEach((el) => el.remove())
+  setPlan('free')
+  for (let i = 0; i < 5; i += 1) buildTextElement({ text: `n${i}`, x: 10, y: 10 + i * 40 })
+  assert('free: pin allowed below limit is blocked at 5', allowPin() === false)
+  assert('free: upgrade card shows at the wall', !!document.getElementById('upgrade-card'))
+  assert('free: upgrade card has one upgrade button', document.querySelectorAll('#upgrade-card .upgrade-btn').length === 1)
+  document.querySelector('#upgrade-card .upgrade-close').click()
+  assert('free: upgrade card closes', !document.getElementById('upgrade-card'))
+  entryInput.value = 'over the limit'
+  openEntry()
+  entryInput.value = 'over the limit'
+  entryInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+  assert('free: entry box does not add past the limit', pinnedCount() === 5)
+  assert('free: entry box hits the wall', !!document.getElementById('upgrade-card'))
+  setPlan('pro')
+  assert('pro: upgrading closes the card', !document.getElementById('upgrade-card'))
+  assert('pro: pin allowed past the limit', allowPin() === true)
+  setPlan('free')
+  assert('free: a restored layout above the limit is kept', pinnedCount() === 5)
 
   return JSON.stringify(results, null, 2)
 })()

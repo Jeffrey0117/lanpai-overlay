@@ -180,6 +180,7 @@ saveBtn.className = 'tb-btn'
 saveBtn.textContent = '存模板'
 saveBtn.addEventListener('click', () => {
   if (!toolbarTarget) return
+  if (templates.length < MAX_TEMPLATES && !allowTemplate(templates.length)) return
   const style = getElementStyle(toolbarTarget)
   const next = [...templates, style].slice(-MAX_TEMPLATES)
   saveTemplates(next)

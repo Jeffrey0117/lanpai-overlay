@@ -8,5 +8,8 @@ contextBridge.exposeInMainWorld('lanpai', {
   onShowHistory: (callback) => ipcRenderer.on('show-history', () => callback()),
   onExitSpotlight: (callback) => ipcRenderer.on('exit-spotlight', () => callback()),
   onShowHelp: (callback) => ipcRenderer.on('show-help', () => callback()),
-  setIgnoreMouse: (ignore) => ipcRenderer.send('set-ignore-mouse', ignore)
+  setIgnoreMouse: (ignore) => ipcRenderer.send('set-ignore-mouse', ignore),
+  getPlan: () => ipcRenderer.invoke('get-plan'),
+  startUpgrade: () => ipcRenderer.invoke('start-upgrade'),
+  onPlanChanged: (callback) => ipcRenderer.on('plan-changed', (_event, plan) => callback(plan))
 })
